@@ -1,0 +1,31 @@
+<ion-content  [fullscreen]="true" color="light">
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+  </div>
+  <ion-grid>
+    <ion-row class="ion-margin-horizontal">
+      <ion-card>    
+        <ion-card-content>
+          <ion-item>
+            <ion-label position="floating">To: </ion-label>
+            <ion-input type="password"></ion-input>
+          </ion-item>
+        </ion-card-content>
+      </ion-card>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-list>
+          <ion-list-header>
+            Recently Sent 
+          </ion-list-header>
+          <ion-item *ngFor="let item of recentlySentAddresses" (click)="goToConfirmPage(item)">
+            <ion-label class="ion-text-wrap">{{ item }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

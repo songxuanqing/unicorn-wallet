@@ -1,0 +1,103 @@
+<ion-content [fullscreen]="true" color="light">
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+  </div>
+  <ion-grid>
+    <ion-row >
+      <ion-col size="6">
+        <ion-label>
+          <ion-note color="light">
+            TOTAL BALANCE ($)
+          </ion-note>
+          <p>
+            <ion-chip color="light">
+              <ion-label class="ion-text-wrap">
+                $11205000
+              </ion-label>
+            </ion-chip>
+          </p>
+        </ion-label>
+      </ion-col>
+    </ion-row>
+
+    <ion-row class="ion-margin-horizontal ion-margin-top" >
+      <ion-col class="ion-text-center">
+        <ion-button color="secondary" shape="circle" (click)="goToSendPage()">
+          <ion-icon slot="icon-only" name="arrow-up"></ion-icon>
+        </ion-button>
+        <div>
+          <ion-label>
+            <ion-note color="light" class="ion-start ion-margin-top">
+            SEND
+          </ion-note>
+        </ion-label>
+        </div>
+      </ion-col>
+      <ion-col class="ion-text-center">
+        <ion-button color="secondary" shape="circle" (click)="buttonClicked()">
+          <ion-icon slot="icon-only" name="card"></ion-icon>
+        </ion-button>
+        <div>
+          <ion-label>
+            <ion-note color="light" class="ion-start ion-margin-top">
+            BUY
+          </ion-note>
+        </ion-label>
+        </div>
+      </ion-col>
+      <ion-col class="ion-text-center">
+        <ion-button color="secondary" shape="circle" (click)="buttonClicked()">
+          <ion-icon slot="icon-only" name="list"></ion-icon>
+        </ion-button>
+        <div>
+          <ion-label>
+            <ion-note color="light" class="ion-start ion-margin-top">
+            TXN HISTORY
+          </ion-note>
+        </ion-label>
+        </div>
+      </ion-col>
+    </ion-row>
+    <ion-list-header>
+      <ion-label color="light">ASSET HOLDINGS</ion-label>
+    </ion-list-header>
+    <ion-list>
+      <ion-list-header>
+        <ion-label color="light">TOKENS</ion-label>
+      </ion-list-header>
+      <ion-item lines="none" *ngFor="let item of tokenInfo" (click)="sendToken(item['asset-id'],item['unit-name'])">
+        <ion-icon slot="start" name="sparkles" color="primary"></ion-icon>
+        <ion-label size="large" class="ion-text-wrap">
+          <b>{{item.name}}</b>
+          <p>
+            {{item.amount}}{{item['unit-name']}}
+          </p>
+        </ion-label>
+        <ion-text slot="end" [color]="dark">${{item.amount}}</ion-text>
+      </ion-item>
+    </ion-list>
+
+    <ion-list-header>
+      <ion-label color="light">NFTs</ion-label>
+    </ion-list-header>
+    <ion-row class="ion-margin-horizontal">
+      <ion-col *ngFor="let item of NFTInfo" size="6">
+        <ion-card class="ion-text-center">
+          <ion-card-header>
+            <div align="center">
+              <ion-thumbnail>
+                <img src="{{item.imageUrl}}"/>
+              </ion-thumbnail>
+            </div>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-label color="dark">{{ item?.name }}</ion-label>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  
+</ion-content>

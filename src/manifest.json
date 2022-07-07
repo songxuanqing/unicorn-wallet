@@ -1,0 +1,26 @@
+{
+    "name": "MyApp",
+    "version": "0.9.321",
+    "homepage_url": "http://localhost:8100",
+    "description": "My Awesome App",
+    "icons": {
+     "16": "assets/icon/favicon.png",
+     "32": "assets/icon/favicon.png"
+    },
+    "manifest_version": 2,
+    "background": {
+    },
+    "browser_action": {
+     "default_icon": {
+      "16": "assets/icon/favicon.png",
+      "32": "assets/icon/favicon.png"
+     },
+     "default_title": "MyApp",
+     "default_popup": "index.html"
+    },
+    "permissions": [
+     "notifications",
+     "storage"
+    ],
+    "content_security_policy": "script-src 'self' 'unsafe-eval' https://connect.facebook.net https://www.googletagmanager.com https://cdn.firebase.com https://*.firebaseio.com; object-src 'self'"
+   }
