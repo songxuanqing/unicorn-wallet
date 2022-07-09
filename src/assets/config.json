@@ -4,10 +4,10 @@
         "dev_mnemonic" : "above luxury grocery barely obtain recipe record need card invest gold exclude market huge frozen wheat nation deal same option burst slam section about stone",
         "dev_pk":"BFChzShBzM561pMUeZ3I7hTEurXr+ZoMzn27aQ8sV3jsL9Hw77wRDbhsM3zZn8Z3N9b0yZA/ooVSSjlhAT2oLw==",
         "token" :"158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59",
-        "ip_address":"http://127.0.0.1",
+        "ip_address":"https://cors-anywhere.herokuapp.com/http://172.30.1.9",
         "port":"8080",
         "kmd_token" : "3c3d3bfa2d53960b1b443e3a5fed1530981dae6aa6427cf531da1b41cb8d40a2",
-        "kmd_ip_address" : "127.0.0.1",
+        "kmd_ip_address" : "localhost",
         "kmd_port" : "7833",
         "token_id" : "94434081"
     }

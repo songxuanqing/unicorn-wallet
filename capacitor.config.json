@@ -3,5 +3,12 @@
   "appName": "My App",
   "webDir": "www",
   "npm-client": "npm",
-  "bundledWebRuntime": false
+  "bundledWebRuntime": false,
+  "server": {
+    "allowNavigation": [
+      "http://localhost/*",
+      "http://10.0.2.2/*",
+      "*10.0.2.2*"
+    ]
+  }
 }

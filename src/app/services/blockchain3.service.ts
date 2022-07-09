@@ -4,11 +4,12 @@ import { Account } from '../models/account';
 import { Token } from '../models/token';
 import { Observable, throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
-// import { HTTP } from '@awesome-cordova-plugins/http/ngx';
 import { Platform } from '@ionic/angular';
 import { Http } from '@capacitor-community/http';
 import * as algosdk  from 'algosdk';
-
+import { FileOpener } from '@ionic-native/file-opener/ngx';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { File } from '@ionic-native/file/ngx';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,8 @@ import * as algosdk  from 'algosdk';
 export class Blockchain3Service {
   base_path = "";
   constructor(
+    private file:File,
+    private fileOpener: FileOpener,
     private http: HttpClient,
     public platform: Platform) {    
       if ( this.platform.is('capacitor') ) {
@@ -28,7 +31,6 @@ export class Blockchain3Service {
 // Http Options
 httpOptions = {
   headers: new HttpHeaders({
-
     'Content-Type': 'application/json',
     'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59'
   })
@@ -52,34 +54,29 @@ handleError(error: HttpErrorResponse) {
 };
 
   getAccount = async(mnemonic) => {
-    if(this.platform.is('capacitor')){
-      return new Promise((resolve)=>{
-        let account = algosdk.mnemonicToSecretKey(mnemonic);
-        console.log(account);
-        return resolve(account);
-      })
-    }else{
-      return new Promise((resolve)=>{
-        let account = algosdk.mnemonicToSecretKey(mnemonic);
-        console.log(account);
-        return resolve(account);
-      })
-    }
+    return new Promise((resolve)=>{
+      let account = algosdk.mnemonicToSecretKey(mnemonic);
+      console.log(account);
+      return resolve(account);
+    })
   }
 
+  //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생
+  //https://unicornwallet.herokuapp.com/
+  //https://cors-anywhere.herokuapp.com/+ip_address로 만든 상태
   getConnection = async()=> {
     return new Promise(async(resolve)=>{
-      if()
-        var configJson = await this.getConfigJson();
-        var token = configJson.SmartContractParams.token;
-        var ip_address = configJson.SmartContractParams.ip_address;
-        var port = configJson.SmartContractParams.port;
-        const algodToken = token;
-        const algodServer = ip_address;
-        const algodPort = Number(port);
-        console.log(token,ip_address,port);
-        let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
-        return resolve(algodClient);
+      var configJsonUnknown = await this.getConfigJson();
+      var configJson:any = configJsonUnknown;
+      var token = configJson.SmartContractParams.token;
+      var ip_address = configJson.SmartContractParams.ip_address;
+      var port = configJson.SmartContractParams.port;
+      const algodToken = token;
+      const algodServer = ip_address;
+      const algodPort = Number(port);
+      console.log(token,ip_address,port);
+      let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
+      return resolve(algodClient);
     })
   }
 
@@ -94,7 +91,8 @@ handleError(error: HttpErrorResponse) {
 
   txnToByte = async(from_mnemonic:string,to_address:string,token_id:number,sent_amount:number) =>  {
     return new Promise(async(resolve)=>{
-      var configJson = await this.getConfigJson();
+      var configJsonUnknown = await this.getConfigJson();
+      var configJson:any = configJsonUnknown;
       //보내는 사람 개인키 가져와서 서명하기
       var devMnemonic = configJson.SmartContractParams.dev_mnemonic;
       type Account = {
@@ -141,7 +139,8 @@ handleError(error: HttpErrorResponse) {
 
   sendTxn = async (from_mnemonic,to_address,token_id,sent_amount) => {
     return new Promise(async(resolve)=>{
-      var configJson = await this.getConfigJson();
+      var configJsonUnknown = await this.getConfigJson();
+      var configJson:any = configJsonUnknown;
       //보내는 사람 개인키 가져와서 서명하기
       var devMnemonic = configJson.SmartContractParams.dev_mnemonic;
       type Account = {
@@ -189,13 +188,70 @@ handleError(error: HttpErrorResponse) {
   })
 }
 
-  getConfigJson (): Promise<any>  {
-    return this.http
-      .get(this.base_path+'/assets/config.json')
+  getConfigJson = async() =>  {
+    if(this.platform.is('capacitor')){
+      // var options = {
+      //   url: 'cdvfile://localhost/assets/config.json',
+      //   headers: { 'Content-Type': 'application/json'},
+      //   params: { },
+      // };
+      // return Http.request({ ...options, method: 'GET' }).then((response)=>{
+      //   console.log("response",JSON.stringify(response));
+      //   console.log(response.data);
+      //   return response.data;
+      // });
+
+      return this.file.checkDir(this.file.applicationDirectory, 'public/assets/')
+      .then(_ => {
+        console.log('Directory exists',this.file.applicationDirectory);
+          return this.file.checkFile(this.file.applicationDirectory+'public/assets/', "config.json").then(_ => {
+          console.log('process file',_);
+          if(_){
+            this.file.copyFile(this.file.applicationDirectory+'public/assets/', "config.json", this.file.dataDirectory, "config.json").then(result => {
+              this.readFilePath(this.file.dataDirectory+'public/assets/config.json');
+          });
+            
+          }
+          }).catch((e) => {
+          console.log('error '+ JSON.stringify(e)); 
+        });
+      })
+      .catch(err => {
+        console.log('Directory doesn\'t exist',this.file.applicationDirectory)
+        let filePath = this.file.applicationDirectory + 'public/assets/';
+        let fakeName = Date.now();
+        this.file.copyFile(filePath, "config.json", this.file.dataDirectory, "config.json").then(result => {
+            this.fileOpener.open(result.nativeURL, 'application/json');
+        });
+      }
+    );
+      return this.file.checkFile("../../assets", "test.txt").then((file) => {
+        console.log('process file',file);
+        // var jsonFile = JSON.parse(file);
+        // console.log('process file',jsonFile);
+     }).catch((e) => {
+       console.log('error '+ JSON.stringify(e)); 
+     });
+    }else{
+      return this.http
+      .get('../../assets/config.json')
       .pipe(
         retry(2),
         catchError(this.handleError)
       ).toPromise();
+    }
   }
 
+  readFilePath = async (path) => {
+    // Here's an example of reading a file with a full file path. Use this to
+    // read binary data (base64 encoded) from plugins that return File URIs, such as
+    // the Camera.
+    const contents = await Filesystem.readFile({
+      path: "file:///data/user/0/com.example.myapp/files/config.json",
+    }).then().catch(e=>{
+      console.log("Err",JSON.stringify(e));
+    })
+  
+    console.log('data:', JSON.stringify(contents));
+  };
 }

@@ -16,7 +16,9 @@ export class Blockchain2Service {
   base_path = "";
   constructor(
     private http: HttpClient,
-     public platform: Platform) {    
+     public platform: Platform) {
+      //최종 배포시 url를 블록체인 노드 url로 바꿔야함.
+      //특히 localhost는 heroku프록시 써야 할 수도 있음.
       if (this.platform.is('capacitor')) {
         this.base_path = 'http://10.0.2.2:8080';
       } else {
