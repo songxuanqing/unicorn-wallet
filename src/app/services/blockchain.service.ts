@@ -11,7 +11,7 @@ import { retry, catchError } from 'rxjs/operators';
 export class ApiService {
 
   // API path
-  base_path = '/novarand';
+  base_path = 'http://localhost:8080';
 
   constructor(private http: HttpClient) { }
 

@@ -1,7 +1,8 @@
 import { Component, OnInit,  } from '@angular/core';
 import { Account } from '../../models/account';
 import { Token } from '../../models/token';
-import { ApiService } from '../../services/blockchain.service';
+import { Blockchain2Service } from '../../services/blockchain2.service';
+// import { Blockchain2Service } from '../../services/blockchain2.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 
@@ -21,7 +22,7 @@ export class WalletPage implements OnInit {
   test_token_id = 94434081;
   test_account='5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU';
   constructor(
-    public apiService: ApiService,
+    public apiService: Blockchain2Service,
     private router:Router,
     private route:ActivatedRoute,
     public toastController: ToastController
@@ -31,6 +32,10 @@ export class WalletPage implements OnInit {
   ngOnInit() {
     const routerState = this.router.getCurrentNavigation().extras.state;
     this.getAccountInfo(this.test_account);
+    this.apiService.getTxnParam().then((response) =>
+      {
+       console.log("txnParam",response)
+      })
   }
 
   ionViewDidEnter(){
@@ -72,8 +77,8 @@ export class WalletPage implements OnInit {
 
   getAccountInfo(account_address) {
     this.apiService.getAccountInfo(account_address).then(async (response) => {
-      console.log(response);
-      var accountData = response;
+      var accountData:any = response;
+      console.log(accountData.assets);
       this.account.address = accountData.address;
       this.account.amount = accountData.amount;
       for(var i = 0; i < accountData.assets.length; i++){
@@ -102,9 +107,7 @@ export class WalletPage implements OnInit {
   getAssetInfo(tk, asset_id){
     return this.apiService.getAssetInfo(asset_id).then((response) =>
       {
-        var tokenData: any;
-        tokenData = response;
-        console.log(tokenData.params.name);
+        var tokenData: any = response;
         tk.name = tokenData.params.name;
         tk.url = tokenData.params.url;
         tk['unit-name'] = tokenData.params['unit-name'];
@@ -115,7 +118,8 @@ export class WalletPage implements OnInit {
   getNFTImage(tk){
     return this.apiService.getNFTMetaData(tk.url).then((response) =>
       {
-        var imageUrl = response.image;
+        var res:any = response;
+        var imageUrl = res.image;
         var stringArr = imageUrl.split(':');
         var imagePath = stringArr[1].substring(1);
         tk.imageUrl = 'https://ipfs.io/ipfs' + imagePath

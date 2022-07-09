@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../services/blockchain.service';
-import { BlockchainSDKService } from '../../services/blockchain-sdk.service';
+import { Blockchain2Service } from '../../services/blockchain2.service';
+import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 
 
@@ -22,8 +22,8 @@ export class ConfirmPage implements OnInit {
   constructor(
     private router:Router,
     private route:ActivatedRoute,
-    private apiService: ApiService,
-    private blockchainSDKService: BlockchainSDKService,
+    private apiService: Blockchain2Service,
+    private blockchainSDKService: Blockchain3Service,
     ) {
       
    }
@@ -75,7 +75,8 @@ export class ConfirmPage implements OnInit {
       var len = +response;
       this.apiService.getTxnParam().then(async(response)=>{
         console.log(response);
-        var fee = response.fee;
+        var res:any = response;
+        var fee = res.fee;
         var min_fee = response['min-fee'];
         var totalFee = Math.max((len*fee),min_fee);
         this.fee = totalFee;
