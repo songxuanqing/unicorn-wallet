@@ -61,20 +61,22 @@ handleError(error: HttpErrorResponse) {
     })
   }
 
-  //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생
-  //https://unicornwallet.herokuapp.com/
-  //https://cors-anywhere.herokuapp.com/+ip_address로 만든 상태
+  //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생??
   getConnection = async()=> {
     return new Promise(async(resolve)=>{
       var configJsonUnknown = await this.getConfigJson();
       var configJson:any = configJsonUnknown;
       var token = configJson.SmartContractParams.token;
-      var ip_address = configJson.SmartContractParams.ip_address;
+      var ip_address = "";
+      if(this.platform.is('capacitor')){
+        ip_address = configJson.SmartContractParams.ip_address_android;
+      }else{
+        ip_address = configJson.SmartContractParams.ip_address;
+      }
       var port = configJson.SmartContractParams.port;
       const algodToken = token;
       const algodServer = ip_address;
       const algodPort = Number(port);
-      console.log(token,ip_address,port);
       let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
       return resolve(algodClient);
     })
@@ -190,30 +192,32 @@ handleError(error: HttpErrorResponse) {
 
   getConfigJson = async() =>  {
     if(this.platform.is('capacitor')){
-      // var options = {
-      //   url: 'cdvfile://localhost/assets/config.json',
-      //   headers: { 'Content-Type': 'application/json'},
-      //   params: { },
-      // };
-      // return Http.request({ ...options, method: 'GET' }).then((response)=>{
-      //   console.log("response",JSON.stringify(response));
-      //   console.log(response.data);
-      //   return response.data;
-      // });
-
       return this.file.checkDir(this.file.applicationDirectory, 'public/assets/')
       .then(_ => {
         console.log('Directory exists',this.file.applicationDirectory);
-          return this.file.checkFile(this.file.applicationDirectory+'public/assets/', "config.json").then(_ => {
-          console.log('process file',_);
-          if(_){
-            this.file.copyFile(this.file.applicationDirectory+'public/assets/', "config.json", this.file.dataDirectory, "config.json").then(result => {
-              this.readFilePath(this.file.dataDirectory+'public/assets/config.json');
-          });
-            
-          }
-          }).catch((e) => {
-          console.log('error '+ JSON.stringify(e)); 
+          return this.file.checkFile(this.file.applicationDirectory+'public/assets/', "config.json")
+          .then(_ => {
+            if(_){
+              return this.file.copyFile(this.file.applicationDirectory+'public/assets/', "config.json", this.file.dataDirectory, "config.json")
+                .then((result) => {
+                 var rs = JSON.stringify(result)
+                //  console.log("copy result"+result.nativeURL);
+                 return Filesystem.readFile({   
+                    path: result.nativeURL,
+                 }).then(contents => {
+                   var contentString = JSON.stringify(contents);
+                   var contentJson = JSON.parse(contentString);
+                   var contentJsonData = contentJson.data;
+                   var contentDecode = atob(contentJsonData);
+                   var contentDecodeJson = JSON.parse(contentDecode);
+                   return contentDecodeJson;
+                 }).catch(e=>{
+                   console.log("Err",JSON.stringify(e));
+                  })
+                });
+              }
+            }).catch((e) => {
+           console.log('error '+ JSON.stringify(e)); 
         });
       })
       .catch(err => {
@@ -223,15 +227,8 @@ handleError(error: HttpErrorResponse) {
         this.file.copyFile(filePath, "config.json", this.file.dataDirectory, "config.json").then(result => {
             this.fileOpener.open(result.nativeURL, 'application/json');
         });
-      }
-    );
-      return this.file.checkFile("../../assets", "test.txt").then((file) => {
-        console.log('process file',file);
-        // var jsonFile = JSON.parse(file);
-        // console.log('process file',jsonFile);
-     }).catch((e) => {
-       console.log('error '+ JSON.stringify(e)); 
-     });
+        }
+      );
     }else{
       return this.http
       .get('../../assets/config.json')
@@ -241,17 +238,4 @@ handleError(error: HttpErrorResponse) {
       ).toPromise();
     }
   }
-
-  readFilePath = async (path) => {
-    // Here's an example of reading a file with a full file path. Use this to
-    // read binary data (base64 encoded) from plugins that return File URIs, such as
-    // the Camera.
-    const contents = await Filesystem.readFile({
-      path: "file:///data/user/0/com.example.myapp/files/config.json",
-    }).then().catch(e=>{
-      console.log("Err",JSON.stringify(e));
-    })
-  
-    console.log('data:', JSON.stringify(contents));
-  };
 }
