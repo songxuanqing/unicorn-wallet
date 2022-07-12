@@ -190,6 +190,37 @@ handleError(error: HttpErrorResponse) {
   })
 }
 
+getDevAccount = async () => {
+  return new Promise(async(resolve)=>{
+    var configJsonUnknown = await this.getConfigJson();
+    var configJson:any = configJsonUnknown;
+    //보내는 사람 개인키 가져와서 서명하기
+    var devMnemonic = configJson.SmartContractParams.dev_mnemonic;
+    var devAddress = configJson.SmartContractParams.dev_address;
+    type Account = {
+      [key:string] : any
+    }
+    var account:Account = await this.getAccount(devMnemonic);
+    return resolve(devMnemonic);
+  })
+}
+
+createAccount = async () => {
+  return new Promise(async(resolve)=>{
+    try {  
+      const myaccount = algosdk.generateAccount();
+      let account_mnemonic = algosdk.secretKeyToMnemonic(myaccount.sk);
+      let account_address = myaccount.addr;
+      var result = account_address.concat(":",account_mnemonic);
+      // console.log("Account Mnemonic = "+ account_mnemonic);
+      return resolve(result);
+    }
+  catch (err) {
+      console.log("err", err);
+    }
+  })
+}
+
   getConfigJson = async() =>  {
     if(this.platform.is('capacitor')){
       return this.file.checkDir(this.file.applicationDirectory, 'public/assets/')

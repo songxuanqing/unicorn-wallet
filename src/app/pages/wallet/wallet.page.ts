@@ -2,10 +2,9 @@ import { Component, OnInit,  } from '@angular/core';
 import { Account } from '../../models/account';
 import { Token } from '../../models/token';
 import { Blockchain2Service } from '../../services/blockchain2.service';
-// import { Blockchain2Service } from '../../services/blockchain2.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-
+import { HeaderService } from '../../services/header.service';
 
 @Component({
   selector: 'app-wallet',
@@ -22,6 +21,7 @@ export class WalletPage implements OnInit {
   test_token_id = 94434081;
   test_account='5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU';
   constructor(
+    private header:HeaderService,
     public apiService: Blockchain2Service,
     private router:Router,
     private route:ActivatedRoute,
@@ -36,6 +36,10 @@ export class WalletPage implements OnInit {
       {
        console.log("txnParam",response)
       })
+  }
+
+  openMenu() {
+    this.header.openMenu();
   }
 
   ionViewDidEnter(){

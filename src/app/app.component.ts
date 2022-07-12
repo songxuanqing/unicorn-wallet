@@ -8,12 +8,12 @@ export class AppComponent {
   public appPages = [ 
     { 
       title: 'Wallet', 
-      url: '/folder/wallet', 
+      url: '/wallet', 
       icon: 'wallet' 
     }, 
     { 
-      title: 'Outbox', 
-      url: '/folder/Outbox', 
+      title: 'Account', 
+      url: '/account', 
       icon: 'paper-plane' 
     }, 
     { 

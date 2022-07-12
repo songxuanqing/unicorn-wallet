@@ -31,6 +31,10 @@ const routes: Routes = [
     path: 'token',
     loadChildren: () => import('./pages/token/token.module').then( m => m.TokenPageModule)
   },
+  {
+    path: 'account',
+    loadChildren: () => import('./pages/account/account.module').then( m => m.AccountPageModule)
+  },
 ];
 
 @NgModule({

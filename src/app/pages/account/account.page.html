@@ -1,0 +1,30 @@
+<ion-content fullscreen>
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+ <ion-grid>
+  <ion-row class="ion-margin-top">
+  <ion-col>
+    <ion-list>
+      <ion-button color="primary" fill="clear">Back</ion-button>
+        <ion-item lines="none" *ngFor="let item of accountListWithAmount" >
+          <ion-icon slot="start" name="save" color="primary"></ion-icon>
+          <ion-label size="large" class="ion-text-wrap">
+            <p>{{item.account.name}}</p>
+          </ion-label>
+          <ion-text slot="end" [color]="dark">{{item.amount}}</ion-text>
+        </ion-item>
+    </ion-list>
+  </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <section>
+        <ion-button color="primary" fill="white" shape="round" expand="block" (click)="createAccount()">CREATE NEW ACCOUNT</ion-button>
+      </section>
+    </ion-col>
+  </ion-row>
+  </ion-grid>
+</div>
+</ion-content>
