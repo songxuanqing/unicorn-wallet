@@ -39,6 +39,10 @@ const routes: Routes = [
     path: 'security',
     loadChildren: () => import('./pages/security/security.module').then( m => m.SecurityPageModule)
   },
+  {
+    path: 'history',
+    loadChildren: () => import('./pages/history/history.module').then( m => m.HistoryPageModule)
+  },
 ];
 
 @NgModule({

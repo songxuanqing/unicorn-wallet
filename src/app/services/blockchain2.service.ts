@@ -4,7 +4,6 @@ import { Account } from '../models/account';
 import { Token } from '../models/token';
 import { Observable, throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
-// import { HTTP } from '@awesome-cordova-plugins/http/ngx';
 import { Platform } from '@ionic/angular';
 import { Http } from '@capacitor-community/http';
 
@@ -14,15 +13,18 @@ import { Http } from '@capacitor-community/http';
 })
 export class Blockchain2Service {
   base_path = "";
+  indexer_path = "";
   constructor(
     private http: HttpClient,
      public platform: Platform) {
       //최종 배포시 url를 블록체인 노드 url로 바꿔야함.
       //특히 localhost는 heroku프록시 써야 할 수도 있음.
       if (this.platform.is('capacitor')) {
-        this.base_path = 'http://10.0.2.2:8080';
+        this.base_path = "http://10.0.2.2:8080";
+        this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
       } else {
         this.base_path = 'http://localhost:8080';
+        this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
       }
     }
 
@@ -142,8 +144,7 @@ export class Blockchain2Service {
       var ipftPath = stringArr[1].substring(1);
       var options = {
         url: 'https://ipfs.io/ipfs' + ipftPath,
-        headers: { 'Content-Type': 'application/json',
-        'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59' },
+        headers: { 'Content-Type': 'application/json'},
         params: { },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -160,4 +161,32 @@ export class Blockchain2Service {
        ).toPromise();
     }
   }
+
+  getTransactionHistory = async(address)=>{
+    if(this.platform.is('capacitor')){
+      var options = {
+        url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
+        headers: { 'Content-Type': 'application/json'},
+        params: { 'limit': '50' },
+      };
+      return Http.request({ ...options, method: 'GET' }).then((response)=>{
+        return response.data;
+      });
+    }else{
+      return await this.http
+      .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
+       {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+         'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
+        }),
+        params : {'limit':50}
+      })
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      ).toPromise();
+    }
+  }
+
 }

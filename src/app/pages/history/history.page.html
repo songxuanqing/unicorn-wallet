@@ -1,0 +1,44 @@
+<ion-content fullscreen>
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+ <ion-grid>
+  <ion-row class="ion-margin-top">
+  <ion-col>
+    <ion-list>
+      <ion-button color="primary" fill="clear">Back</ion-button>
+
+      <ion-accordion-group>
+        <ion-accordion *ngFor="let item of historyList">
+          <ion-item slot="header" color="light">
+            <ion-icon slot="start" [name]="item.icon" [color]="item.color"></ion-icon>
+            <ion-text>{{item.txnTypeToString}}</ion-text>
+            <ion-text slot="end">{{item.amount}} mAlgos</ion-text>
+          </ion-item>
+          <div class="ion-padding" slot="content">
+            <p>Date : {{item.date}}</p>
+            <p>Fee : {{item.fee}}  mAlgos</p>
+            <p>{{item.receiver}}</p>
+          </div>
+        </ion-accordion>
+      </ion-accordion-group>
+
+      <!-- https://ionicframework.com/docs/api/modal
+      sheet modal=>filter list and search -->
+      
+        <!-- <ion-item lines="none" *ngFor="let item of historyList" >
+          <ion-icon slot="start" name="arrow-redo" [color]="item.isSent ? 'success' : 'danger'"></ion-icon>
+          <ion-label size="large" class="ion-text-wrap">
+            <p>{{item.account.name}}</p>
+            <p class="wrap-text">{{item.account.addr}}</p>
+          </ion-label>
+          <ion-text slot="end" [color]="dark">{{item.amount}}</ion-text>
+        </ion-item> -->
+
+    </ion-list>
+  </ion-col>
+  </ion-row>
+  </ion-grid>
+</div>
+</ion-content>

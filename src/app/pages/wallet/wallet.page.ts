@@ -65,6 +65,17 @@ export class WalletPage implements OnInit {
     this.router.navigateByUrl('/send',navigationExtras);
   }
 
+  goToHistoryPage(){
+    const navigationExtras: NavigationExtras = {
+      state: {
+        txnParams:{
+          sender: this.test_account,
+        },
+      },
+    };
+    this.router.navigateByUrl('/history',navigationExtras);
+  }
+
   sendToken(asset_id,asset_unit){
     const navigationExtras: NavigationExtras = {
       state: {
