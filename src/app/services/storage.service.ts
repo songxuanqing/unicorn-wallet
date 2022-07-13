@@ -54,8 +54,8 @@ export class StorageService {
   checkName = async (key) => {
     return new Promise(async(resolve)=>{
       const { value } = await Storage.get({ key: 'accounts' });
-      console.log(`Hello ${value}!`);
-      return { value };
+      console.log(`check name ${value}!`);
+      return resolve(value);
     })
   };
 
@@ -63,7 +63,7 @@ export class StorageService {
     if(this.platform.is('capacitor')){
       return new Promise(async(resolve)=>{
         var value = await this.checkName(key);
-        return value;
+        return resolve(value);
       })
     }else{
       let callbackPromise = new Promise((resolve, reject) => {

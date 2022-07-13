@@ -14,22 +14,12 @@ export class AppComponent {
     { 
       title: 'Account', 
       url: '/account', 
-      icon: 'paper-plane' 
-    }, 
+      icon: 'person-circle' 
+    },
     { 
-      title: 'Favorites', 
-      url: '/folder/Favorites', 
-      icon: 'heart' 
-    }, 
-    { 
-      title: 'Sign Up', 
-      url: '/folder/SignUp', 
-      icon: 'person-add' 
-    }, 
-    { 
-      title: 'Log In', 
-      url: '/folder/LogIn', 
-      icon: 'log-in' 
+      title: 'Security', 
+      url: '/security', 
+      icon: 'shield-checkmark' 
     }, 
     { 
       title: 'Log Out', 

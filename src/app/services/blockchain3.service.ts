@@ -53,13 +53,7 @@ handleError(error: HttpErrorResponse) {
     'Something bad happened; please try again later.');
 };
 
-  getAccount = async(mnemonic) => {
-    return new Promise((resolve)=>{
-      let account = algosdk.mnemonicToSecretKey(mnemonic);
-      console.log(account);
-      return resolve(account);
-    })
-  }
+
 
   //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생??
   getConnection = async()=> {
@@ -202,6 +196,39 @@ getDevAccount = async () => {
     }
     var account:Account = await this.getAccount(devMnemonic);
     return resolve(devMnemonic);
+  })
+}
+
+importAccount = async (mnemonic) => {
+  console.log("import account",mnemonic);
+  return new Promise(async(resolve,reject)=>{
+    try{
+      type Account = {
+        [key:string] : any
+      }
+      var account:Account = await this.getAccount(mnemonic);
+      var result:boolean;
+      if(account!=null){
+        result=true;
+      }else{
+        result=false;
+      }
+      resolve([result,account.addr]);
+    }catch(err){
+      reject(err);
+    }
+  })
+}
+
+getAccount = async(mnemonic) => {
+  return new Promise((resolve,reject)=>{
+    try{
+      let account = algosdk.mnemonicToSecretKey(mnemonic);
+      resolve(account);
+      console.log(account);
+    }catch(err){
+      reject(err);
+    }
   })
 }
 
