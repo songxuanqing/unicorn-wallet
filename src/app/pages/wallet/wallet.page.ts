@@ -19,7 +19,7 @@ export class WalletPage implements OnInit {
   public token_unit:string = "";
   public isBackFromTxn:boolean = false;
   test_token_id = 94434081;
-  test_account='5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU';
+  //test_account='5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU';
   constructor(
     private header:HeaderService,
     public apiService: Blockchain2Service,
@@ -31,7 +31,9 @@ export class WalletPage implements OnInit {
   }
   ngOnInit() {
     const routerState = this.router.getCurrentNavigation().extras.state;
-    this.getAccountInfo(this.test_account);
+    this.account.address = routerState.account.addr;
+    this.account.name = routerState.account.name;
+    this.getAccountInfo(this.account.address);
     this.apiService.getTxnParam().then((response) =>
       {
        console.log("txnParam",response)
@@ -57,7 +59,7 @@ export class WalletPage implements OnInit {
       state: {
         txnParams:{
           token_id: this.test_token_id,
-          sender: this.test_account,
+          sender: this.account.address,
           token_unit : this.token_unit,
         },
       },
@@ -69,7 +71,7 @@ export class WalletPage implements OnInit {
     const navigationExtras: NavigationExtras = {
       state: {
         txnParams:{
-          sender: this.test_account,
+          sender: this.account.address,
         },
       },
     };
@@ -81,7 +83,7 @@ export class WalletPage implements OnInit {
       state: {
         txnParams:{
           token_id: asset_id,
-          sender: this.test_account,
+          sender: this.account.address,
           token_unit : asset_unit,
         },
       },

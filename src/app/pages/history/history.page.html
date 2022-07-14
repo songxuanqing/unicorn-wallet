@@ -8,7 +8,7 @@
   <ion-col>
     <ion-list>
       <ion-button color="primary" fill="clear">Back</ion-button>
-      <ion-button color="primary" fill="clear" id="open-modal" (click)="getTokenList(account_address)">Search by Token</ion-button>
+      <ion-button color="primary" fill="clear" id="open-modal" class="verticalBottom" (click)="getTokenList(account_address)">Search by Token</ion-button>
       <ion-accordion-group>
         <ion-accordion *ngFor="let item of historyList">
           <ion-item slot="header" color="light" class="item-display">

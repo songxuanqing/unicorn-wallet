@@ -14,6 +14,7 @@ declare var chrome;
 export class StorageService {
   private storage: Storage;
   private crypto: CryptoJS;
+  private hashedKey: string;
  
   constructor(
     // private storage: Storage, 
@@ -77,16 +78,70 @@ export class StorageService {
     }
   }
 
-  public setEncryption(key: string, value: any){
-    var valueToString = JSON.stringify(value);
-    var k = 'we love novarand'.repeat(2);
-    var rk = k.padEnd(32, " "); // AES256은 key 길이가 32자여야 함
-    var b = valueToString;
+  //회원가입 시 한번 사용
+  public setHashedEncryption(key:string, value:any, encryptionKey:string){
+    return new Promise(async(resolve)=>{
+      var hashedPw = CryptoJS.SHA256(value);
+      this.setEncryption(key,hashedPw,encryptionKey); //keyForUser and hash and pw 
+      this.hashedKey = hashedPw;
+    })
+  }
+
+ //로그인 시 사용
+  public getHashedDecryption(key:string, value:any, encryptionKey:string){
+    return new Promise(async(response)=>{
+      this.getDecryption(key,encryptionKey).then((resolve)=>{//keyForUser -> hash
+        var responseToAny:any = resolve; //JSON 객체로 반환된 원래값. undefined를 any로 할당해서 String변환
+        var hashToString = JSON.stringify(responseToAny);
+        var encryptedValue = hashToString;
+        if(encryptionKey==encryptedValue){ //hash String과 입력한 값이 일치하는지 확인
+          return response(true); //로그인 통과용 response
+          this.hashedKey = encryptedValue; //전역변수로 선언된 hashedKey에 값 할당.
+        }else{
+          return response(false);
+        }
+      }) 
+    })
+  }
+
+  public setEncryption(key: string, value: any, encryptionKey:string|null){
+    var valueToString = JSON.stringify(value); 
+    var k;
+    var padding:string ="";
+    if(encryptionKey!=null){ 
+      k = encryptionKey;
+      padding = encryptionKey.repeat(2);
+    }else{
+      k = this.hashedKey; //account정보 반환시
+    }
+    var rk = k.padEnd(32, padding); // AES256은 key 길이가 32자여야 함. hash256는 이미 32byte이므로 불필요
+    var b = valueToString; //hash
     var eb = this.encodeByAES56(rk, b);
-    console.log(eb);
-    this.set(key, eb).then(()=>{
+    console.log(eb); //암호화된 해시
+    this.set(key, eb).then(()=>{ //key:keyForUser 와 암호호된 hash저장
     });
   }
+
+
+  public getDecryption = (key:string, encryptionKey:string|null) => {
+    return new Promise(async(resolve)=>{
+      var encryptedValue = await this.get(key); //암호화된 정보:hash,account
+      var k;
+      var padding:string ="";
+      if(encryptionKey!=null){
+        k = encryptionKey;
+        padding = encryptionKey.repeat(2);
+      }else{
+        k = this.hashedKey;
+      }
+      var rk = k.padEnd(32, padding); // AES256은 key 길이가 32자여야 함
+      var eb = encryptedValue;
+      var b = this.decodeByAES256(rk, eb);
+      console.log('Item: %o',b);
+      return resolve(JSON.parse(b)); //원래값 반환. JSON객체 형태.
+    })
+  }
+
 
   encodeByAES56(key, data){
     const cipher = CryptoJS.AES.encrypt(data, CryptoJS.enc.Utf8.parse(key), {
@@ -96,18 +151,6 @@ export class StorageService {
     });
     return cipher.toString();
 }
-
-  public getDecryption = (key) => {
-    return new Promise(async(resolve)=>{
-      var encryptedValue = await this.get(key);
-      var k = 'we love novarand'.repeat(2); // 암호화에서 사용한 값과 동일하게 해야함
-      var rk = k.padEnd(32, " "); // AES256은 key 길이가 32자여야 함
-      var eb = encryptedValue;
-      var b = this.decodeByAES256(rk, eb);
-      console.log('Item: %o',b);
-      return resolve(JSON.parse(b));
-    })
-  }
 
   decodeByAES256(key, data){
     const cipher = CryptoJS.AES.decrypt(data, CryptoJS.enc.Utf8.parse(key), {

@@ -41,6 +41,7 @@ export class AccountPage implements OnInit {
     }
 
   ngOnInit() {
+
   }
   ionViewWillEnter(){
     this.getAccountList();
@@ -68,11 +69,11 @@ export class AccountPage implements OnInit {
   }
 
   storeAccount(){
-    this.storageService.setEncryption("accounts",this.accountList);
+    this.storageService.setEncryption("accounts",this.accountList,null);
   }
 
   getAccountList(){
-    this.storageService.getDecryption("accounts").then(async(response)=>{
+    this.storageService.getDecryption("accounts",null).then(async(response)=>{
       var responseToAny:any = response;
       this.getAccountListFromStorage(responseToAny).then(async(response)=>{
         this.getAmountByAccount();

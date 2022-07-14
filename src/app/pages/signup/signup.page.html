@@ -1,0 +1,25 @@
+<ion-content fullscreen>
+  <div class="main-header">
+    <ion-avatar slot="start" class="ion-margin-horizontal" >
+    </ion-avatar>
+ 
+  <ion-card>
+    <img src="../../../assets/img/unicorn.png" />
+    <ion-card-header>
+      <ion-card-subtitle>You use Unicorn wallet for first time</ion-card-subtitle>
+      <ion-card-title>WELCOME</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-label position="floating" >PASSWORD</ion-label>
+        <ion-input type="password" (input)='checkValidation($event)'></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label position="floating" >CONFIRM PASSWORD</ion-label>
+        <ion-input type="password" (input)='checkConfirm($event)'></ion-input>
+      </ion-item>
+        <ion-button color="primary" disabled="{{isDisabledSignUp}}" expand="block" shape="round" size="full" class="ion-margin-top" (click)="signup()">SIGN UP</ion-button>
+    </ion-card-content>
+  </ion-card>
+</div>
+</ion-content>
