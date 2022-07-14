@@ -1,9 +1,9 @@
 export class Token {
-    amount:number;
-    'asset-id':number;
-    'is-frozen':boolean;
-    name:string;
-    url:string;
-    'unit-name':string;
-    imageUrl:string;
+    amount:number|null;
+    'asset-id':number|null;
+    'is-frozen':boolean|null;
+    name:string|null;
+    url:string|null;
+    'unit-name':string|null;
+    imageUrl:string|null;
 }

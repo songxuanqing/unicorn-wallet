@@ -162,12 +162,12 @@ export class Blockchain2Service {
     }
   }
 
-  getTransactionHistory = async(address)=>{
+  getTransactionHistory = async(address,next_token)=>{
     if(this.platform.is('capacitor')){
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
         headers: { 'Content-Type': 'application/json'},
-        params: { 'limit': '50' },
+        params: { 'limit': '20','next':next_token },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
         return response.data;
@@ -180,7 +180,61 @@ export class Blockchain2Service {
           'Content-Type': 'application/json',
          'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
         }),
-        params : {'limit':50}
+        params : {'limit': 20,'next':next_token}
+      })
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      ).toPromise();
+    }
+  }
+
+  getSelectedTokenTransactionHistory = async(address,asset_id,next_token)=>{
+    if(this.platform.is('capacitor')){
+      var options = {
+        url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
+        headers: { 'Content-Type': 'application/json'},
+        params: { 'limit': '20','asset-id': asset_id.toString(),'next':next_token },
+      };
+      return Http.request({ ...options, method: 'GET' }).then((response)=>{
+        return response.data;
+      });
+    }else{
+      return await this.http
+      .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
+       {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+         'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
+        }),
+        params : {'limit': 20,'asset-id': asset_id,'next':next_token }
+      })
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      ).toPromise();
+    }
+  }
+
+  getCoinTransactionHistory = async(address,txn_type,next_token)=>{
+    if(this.platform.is('capacitor')){
+      var options = {
+        url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
+        headers: { 'Content-Type': 'application/json'},
+        params: { 'limit': '20','tx-type': txn_type,'next':next_token },
+      };
+      return Http.request({ ...options, method: 'GET' }).then((response)=>{
+        return response.data;
+      });
+    }else{
+      return await this.http
+      .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
+       {
+        headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+         'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
+        }),
+        params : {'limit': 20,'tx-type': txn_type,'next':next_token }
       })
       .pipe(
         retry(2),

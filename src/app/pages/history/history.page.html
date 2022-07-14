@@ -8,37 +8,59 @@
   <ion-col>
     <ion-list>
       <ion-button color="primary" fill="clear">Back</ion-button>
-
+      <ion-button color="primary" fill="clear" id="open-modal" (click)="getTokenList(account_address)">Search by Token</ion-button>
       <ion-accordion-group>
         <ion-accordion *ngFor="let item of historyList">
-          <ion-item slot="header" color="light">
-            <ion-icon slot="start" [name]="item.icon" [color]="item.color"></ion-icon>
-            <ion-text>{{item.txnTypeToString}}</ion-text>
-            <ion-text slot="end">{{item.amount}} mAlgos</ion-text>
+          <ion-item slot="header" color="light" class="item-display">
+              <ion-icon slot="start" [name]="item.icon" [color]="item.color"></ion-icon>
+              <div>
+                <ion-text>{{item.txnTypeToString}}</ion-text>
+                <ion-text class="wrap-text">{{item.date}}</ion-text>
+              </div>
+              <ion-text slot="end">{{item.amount}} mAlgos</ion-text>
           </ion-item>
           <div class="ion-padding" slot="content">
+            <p>Txn ID : {{item.id}}  mAlgos</p>
             <p>Date : {{item.date}}</p>
             <p>Fee : {{item.fee}}  mAlgos</p>
-            <p>{{item.receiver}}</p>
+            <p [hidden]="item.isAssetIdHidden">Asset ID : {{item['asset-id']}}</p>
+            <p [hidden]="item.isAmountHidden">Sent Amount : {{item.amount}}  </p>
+            <p [hidden]="item.isAssetAmountHidden">Sent Asset Amount : {{item.amountAxfer}}</p>
+            <p [hidden]="item.isReceiverHidden">Receiver : {{item.receiver}}</p>
           </div>
         </ion-accordion>
       </ion-accordion-group>
-
-      <!-- https://ionicframework.com/docs/api/modal
-      sheet modal=>filter list and search -->
-      
-        <!-- <ion-item lines="none" *ngFor="let item of historyList" >
-          <ion-icon slot="start" name="arrow-redo" [color]="item.isSent ? 'success' : 'danger'"></ion-icon>
-          <ion-label size="large" class="ion-text-wrap">
-            <p>{{item.account.name}}</p>
-            <p class="wrap-text">{{item.account.addr}}</p>
-          </ion-label>
-          <ion-text slot="end" [color]="dark">{{item.amount}}</ion-text>
-        </ion-item> -->
-
     </ion-list>
+
+    <ion-infinite-scroll threshold="100px" (ionInfinite)="loadData($event)">
+      <ion-infinite-scroll-content
+        loadingSpinner="bubbles"
+        loadingText="Loading more data...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
   </ion-col>
   </ion-row>
+
+  <ion-modal #modal trigger="open-modal" [initialBreakpoint]="0.25" [breakpoints]="[0, 0.25, 0.5, 0.75]" (willDismiss)="onWillDismiss($event)">
+    <ng-template>
+      <ion-content>
+        <ion-list>
+          <ion-item lines="none" *ngFor="let item of assetInfo" (click)="select(item['asset-id'])">
+            <ion-icon slot="start" name="sparkles" color="primary"></ion-icon>
+            <ion-label size="large" class="ion-text-wrap">
+              <b>{{item.name}}</b>
+              <p>
+                {{item.amount}}{{item['unit-name']}}
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+
   </ion-grid>
 </div>
 </ion-content>

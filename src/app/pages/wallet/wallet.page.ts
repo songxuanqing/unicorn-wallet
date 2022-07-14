@@ -96,12 +96,12 @@ export class WalletPage implements OnInit {
       console.log(accountData.assets);
       this.account.address = accountData.address;
       this.account.amount = accountData.amount;
-      for(var i = 0; i < accountData.assets.length; i++){
+      accountData.assets.forEach(async (item)=>{
         var token = new Token();
-        token.amount = accountData.assets[i].amount;
-        token['asset-id'] = accountData.assets[i]['asset-id'];
-        token['is-frozen'] = accountData.assets[i]['is-frozen'];
-        token = await this.getAssetInfo(token,accountData.assets[i]['asset-id']);
+        token.amount = item.amount;
+        token['asset-id'] = item['asset-id'];
+        token['is-frozen'] = item['is-frozen'];
+        token = await this.getAssetInfo(token,item['asset-id']);
         this.assetInfo.push(token);
         if(token.amount>1){
           this.tokenInfo.push(token);
@@ -111,7 +111,7 @@ export class WalletPage implements OnInit {
           }
           this.NFTInfo.push(token);
         }
-      }
+      });
       console.log(this.assetInfo);
       this.account.assets = this.assetInfo;
       console.log(this.account);

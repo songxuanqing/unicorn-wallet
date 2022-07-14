@@ -1,11 +1,5 @@
-ion-input {
-	padding-left: 10px;
-    font-size: 10px;
-    font-weight: bold;
-}
 ion-text {
-    text-align: right;
-	padding-left: 10px;
+    text-align: left;
     font-size: 10px;
     font-weight: bold;
 }
@@ -18,15 +12,13 @@ ion-button{
 }
   
 .wrap-text {
-    margin: 13px 8px 13px 0;
     margin: 0;
     display: block;
     overflow: hidden;
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
-    font-size: inherit;
+    font-size: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.item-display{
+    display: block;
 }
