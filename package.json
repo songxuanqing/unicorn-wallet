@@ -39,6 +39,7 @@
     "@ionic/angular": "^6.1.9",
     "@ionic/storage-angular": "^3.0.6",
     "algosdk": "^1.18.1",
+    "bcryptjs": "^2.4.3",
     "browserify-aes": "^1.2.0",
     "cordova-plugin-advanced-http": "^3.3.1",
     "cordova-plugin-file": "^6.0.2",

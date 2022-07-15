@@ -9,7 +9,9 @@
     <ion-list>
       <ion-button color="primary" fill="clear">Back</ion-button>
         <ion-item lines="none" *ngFor="let item of accountListWithAmount" >
-          <ion-icon slot="start" name="save" color="primary"></ion-icon>
+          <ion-button>
+            <ion-icon slot="start" name="download-outline"></ion-icon>
+          </ion-button>
           <ion-label size="large" class="ion-text-wrap">
             <p>{{item.account.name}}</p>
             <p class="wrap-text">{{item.account.addr}}</p>

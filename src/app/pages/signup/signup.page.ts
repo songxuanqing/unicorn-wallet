@@ -25,6 +25,7 @@ export class SignupPage implements OnInit {
 
   signup(){
     this.hashAndStorePw(this.confirmedPw).then(response=>{
+      console.log("done up to move");
       const navigationExtras: NavigationExtras = {
         state: {
           isLogin:true,
@@ -75,29 +76,35 @@ export class SignupPage implements OnInit {
   hashAndStorePw(pw){
     return new Promise(async resolve=>{
       await this.storageService.setHashedEncryption("keyForUser",pw,pw);
-      this.createAccount();
-      return true;
+      await this.storageService.getHashedDecryption("keyForUser",pw);
+      await this.createAccount();
+      console.log("hashedStore");
+      return resolve(true);
     })
   }
 
   createAccount(){
-    this.blockchainSDKService.createAccount().then(async(response)=>{
-      console.log(response);
-      var responseToString:any = response;
-      var name = "Account"+(this.accountList.length + 1);
-      var responseArr = responseToString.split(":");
-      var newAccount:AccountStored = new AccountStored();
-      newAccount.name = name;
-      newAccount.addr = responseArr[0];
-      newAccount.mnemonic = responseArr[1];
-      this.accountCreated = newAccount;
-      this.accountList.push(newAccount);
-      this.storeAccount();
-    });
+    return new Promise(resolve=>{
+      this.blockchainSDKService.createAccount().then(async(response)=>{
+        console.log(response);
+        var responseToString:any = response;
+        var name = "Account"+(this.accountList.length + 1);
+        var responseArr = responseToString.split(":");
+        var newAccount:AccountStored = new AccountStored();
+        newAccount.name = name;
+        newAccount.addr = responseArr[0];
+        newAccount.mnemonic = responseArr[1];
+        this.accountCreated = newAccount;
+        this.accountList.push(newAccount);
+        await this.storeAccount();
+        return resolve(true);
+      });
+    })
+
   }
 
-  storeAccount(){
-    this.storageService.setEncryption("accounts",this.accountList, null);
+  async storeAccount(){
+    await this.storageService.setEncryption("accounts",this.accountList, null);
   }
 
 }

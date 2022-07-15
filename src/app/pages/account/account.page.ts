@@ -68,8 +68,8 @@ export class AccountPage implements OnInit {
     });
   }
 
-  storeAccount(){
-    this.storageService.setEncryption("accounts",this.accountList,null);
+  async storeAccount(){
+    await this.storageService.setEncryption("accounts",this.accountList, null);
   }
 
   getAccountList(){
