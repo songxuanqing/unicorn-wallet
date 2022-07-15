@@ -14,7 +14,6 @@ export class SignupPage implements OnInit {
   private pw = ""; 
   private confirmedPw = "";
   public isDisabledSignUp = true;
-  private accountCreated:AccountStored;
   constructor(private router:Router,
     private route:ActivatedRoute,
     private blockchainSDKService: Blockchain3Service,
@@ -27,12 +26,8 @@ export class SignupPage implements OnInit {
     this.hashAndStorePw(this.confirmedPw).then(response=>{
       console.log("done up to move");
       const navigationExtras: NavigationExtras = {
-        state: {
-          isLogin:true,
-          account:this.accountCreated,
-        },
       };
-      this.router.navigateByUrl('/wallet',navigationExtras);
+      this.router.navigateByUrl('/import-or-create',navigationExtras);
     });
   }
 
@@ -76,35 +71,10 @@ export class SignupPage implements OnInit {
   hashAndStorePw(pw){
     return new Promise(async resolve=>{
       await this.storageService.setHashedEncryption("keyForUser",pw,pw);
-      await this.storageService.getHashedDecryption("keyForUser",pw);
-      await this.createAccount();
-      console.log("hashedStore");
+      //await this.storageService.getHashedDecryption("keyForUser",pw);
       return resolve(true);
     })
   }
 
-  createAccount(){
-    return new Promise(resolve=>{
-      this.blockchainSDKService.createAccount().then(async(response)=>{
-        console.log(response);
-        var responseToString:any = response;
-        var name = "Account"+(this.accountList.length + 1);
-        var responseArr = responseToString.split(":");
-        var newAccount:AccountStored = new AccountStored();
-        newAccount.name = name;
-        newAccount.addr = responseArr[0];
-        newAccount.mnemonic = responseArr[1];
-        this.accountCreated = newAccount;
-        this.accountList.push(newAccount);
-        await this.storeAccount();
-        return resolve(true);
-      });
-    })
-
-  }
-
-  async storeAccount(){
-    await this.storageService.setEncryption("accounts",this.accountList, null);
-  }
 
 }

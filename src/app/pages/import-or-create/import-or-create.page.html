@@ -1,0 +1,57 @@
+<ion-content fullscreen>
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+ <ion-grid >
+    <ion-row class="ion-margin-top">
+      <ion-col>
+        <div>
+          <ion-card id="open-modal">
+            <ion-card-header>
+              <ion-card-title>IMPORT ACCOUNT</ion-card-title>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-icon name="arrow-up-circle" color="primary"></ion-icon>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </ion-col>
+      <ion-col>
+        <div>
+          <ion-card (click)="createAndGoToWallet()">
+            <ion-card-header >
+              <ion-card-title>CREATE NEW ACCOUNT</ion-card-title>
+            </ion-card-header>
+            <ion-card-content >
+              <ion-icon name="add-circle" color="primary"></ion-icon>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>
+
+<ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="cancel()">Cancel</ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
+          <ion-button color="primary" (click)="importAndGoToWallet(inputMnemonic)" [strong]="true">Confirm</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item>
+        <ion-label position="stacked">Enter account mnemonic</ion-label>
+        <ion-textarea rows="6" cols="20"  type="text" placeholder="25-word mnemonic" [(ngModel)]="inputMnemonic"></ion-textarea>
+      </ion-item>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+</ion-content>

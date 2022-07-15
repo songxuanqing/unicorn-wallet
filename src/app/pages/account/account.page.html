@@ -8,10 +8,8 @@
   <ion-col>
     <ion-list>
       <ion-button color="primary" fill="clear">Back</ion-button>
-        <ion-item lines="none" *ngFor="let item of accountListWithAmount" >
-          <ion-button>
-            <ion-icon slot="start" name="download-outline"></ion-icon>
-          </ion-button>
+        <ion-item lines="none" *ngFor="let item of accountListWithAmount" (click)="changeAccount(item)">
+          <ion-icon slot="start" color="primary" name="save"></ion-icon>
           <ion-label size="large" class="ion-text-wrap">
             <p>{{item.account.name}}</p>
             <p class="wrap-text">{{item.account.addr}}</p>
@@ -31,21 +29,27 @@
   <ion-row>
     <ion-col>
       <section>
-        <ion-button color="primary" fill="white" shape="round" expand="block" id="open-modal">IMPORT ACCOUNT</ion-button>
+        <ion-button color="primary" fill="white" shape="round" expand="block" id="open-account-modal">IMPORT ACCOUNT</ion-button>
+      </section>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <section>
+        <ion-button color="primary" fill="white" shape="round" expand="block" (click)="goToExportPage()">EXPORT ACCOUNT</ion-button>
       </section>
     </ion-col>
   </ion-row>
   </ion-grid>
 </div>
 
-<ion-modal trigger="open-modal" (willDismiss)="onWillDismiss($event)">
+<ion-modal trigger="open-account-modal" (willDismiss)="onWillDismiss($event)">
   <ng-template>
     <ion-header>
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button (click)="cancel()">Cancel</ion-button>
         </ion-buttons>
-        <!-- <ion-title>IMPORT</ion-title> -->
         <ion-buttons slot="end">
           <ion-button (click)="confirm(inputMnemonic)" [strong]="true">Confirm</ion-button>
         </ion-buttons>

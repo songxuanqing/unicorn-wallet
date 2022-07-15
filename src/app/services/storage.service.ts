@@ -113,7 +113,7 @@ export class StorageService {
     return new Promise((response)=>{
       this.getDecryption(key,encryptionKey).then(async(resolve)=>{//keyForUser -> hash
         var responseToAny:any = resolve; //JSON 객체로 반환된 원래값. undefined를 any로 할당해서 String변환
-        var hashToString = JSON.stringify(responseToAny);
+        var hashToString = responseToAny;
         var encryptedValue = hashToString;
         console.log('getHashedDecryption',encryptedValue);
         var validPassword = await bcrypt.compare(encryptionKey,encryptedValue);
@@ -131,7 +131,7 @@ export class StorageService {
 
   public setEncryption(key: string, value: any, encryptionKey:string|null){
     return new Promise (resolve=>{
-      console.log(typeof key);
+      console.log("hashedpw",value);
       var valueToString = JSON.stringify(value); 
       var k:string = "";
       var padding:string ="";
@@ -143,6 +143,7 @@ export class StorageService {
       }
       var rk = String(k).padEnd(32, padding); // AES256은 key 길이가 32자여야 함. hash256는 이미 32byte이므로 불필요
       var b = valueToString; //hash
+      console.log("key",rk,"value",b);
       var eb = this.encodeByAES56(rk, b);
       console.log(eb); //암호화된 해시
       this.set(key, eb).then(()=>{ //key:keyForUser 와 암호호된 hash저장
@@ -167,10 +168,14 @@ export class StorageService {
         k = this.hashedKey;
       }
       console.log("key",key,"value",encryptedValue);
+      console.log(String(k));
+      console.log(String(k).padEnd(32, padding));
+      console.log(padding);
       var rk = String(k).padEnd(32, padding); // AES256은 key 길이가 32자여야 함
       var eb = encryptedValue;
+      console.log("key",rk,"value",eb);
       var b = this.decodeByAES256(rk, eb);
-      console.log('Item: %o',b);
+      console.log('Item:',JSON.parse(b));
       return resolve(JSON.parse(b)); //원래값 반환. JSON객체 형태.
     })
   }

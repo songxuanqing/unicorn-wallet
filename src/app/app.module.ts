@@ -11,6 +11,7 @@ import { HeaderService } from './services/header.service';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { FormsModule } from '@angular/forms';
+import { Clipboard } from '@ionic-native/clipboard/ngx';
 
 @NgModule({
   declarations: [AppComponent],
@@ -20,7 +21,7 @@ import { FormsModule } from '@angular/forms';
   // or after 30 seconds (whichever comes first).
   registrationStrategy: 'registerWhenStable:30000'
 }),],
-  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },FileOpener,File,HeaderService],
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },FileOpener,File,HeaderService,Clipboard],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

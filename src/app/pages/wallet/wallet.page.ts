@@ -25,7 +25,7 @@ export class WalletPage implements OnInit {
     public apiService: Blockchain2Service,
     private router:Router,
     private route:ActivatedRoute,
-    public toastController: ToastController
+    public toastController: ToastController,
   ) {
     this.account = new Account();
   }
@@ -144,17 +144,10 @@ export class WalletPage implements OnInit {
       })
   }
 
-  async presentToast() {
-    const toast = await this.toastController.create({
-      message: 'Your settings have been saved.',
-      duration: 2000
-    });
-    toast.present();
-  }
-
   async presentToastWithOptions() {
     const toast = await this.toastController.create({
       message: "Transaction Successfully Requested",
+      duration: 500,
       icon: 'information-circle',
       position: 'top',
       buttons: [

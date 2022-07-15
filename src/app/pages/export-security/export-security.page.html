@@ -1,0 +1,44 @@
+<ion-content fullscreen>
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+ <ion-grid >
+    <ion-row class="ion-margin-top">
+      <ion-col>
+          <ion-item lines="none">
+            <ion-text class="highlight ion-margin-top ion-margin-bottom">
+              {{title}}
+            </ion-text>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-text class="ion-margin-top ion-margin-bottom">
+              {{introduction}}
+            </ion-text>
+          </ion-item>
+          <ion-item class="warning" lines="none" color="dark">
+            <ion-icon name="warning" color="danger" class="ion-margin-end"></ion-icon>
+            <ion-text class="ion-margin-top  ion-margin-bottom">
+              {{warning}}
+            </ion-text>
+          </ion-item>
+          <ion-item [hidden]="isConfirmed">
+            <ion-label position="stacked" value="">{{label}}</ion-label>
+            <ion-input [(ngModel)]="pw" type="password"></ion-input>
+          </ion-item>
+          <ion-item class="ion-padding-bottom" lines="none" [hidden]="isConfirmed">
+            <ion-button slot="start" color="medium" shape="round" size="full" class="ion-margin-top" (click)="goToWalletPage()">Cancel</ion-button>
+            <ion-button slot="end" color="primary" shape="round" size="full" class="ion-margin-top" (click)="confirm()">Confirm</ion-button>
+          </ion-item>
+          <ion-item [hidden]="isNotConfirmed">
+            <ion-text value="">{{mnemonic}}</ion-text>
+          </ion-item>
+          <ion-item class="ion-padding-bottom" lines="none" [hidden]="isNotConfirmed">
+            <ion-button slot="start" color="medium" shape="round" size="full" class="ion-margin-top" (click)="goToWalletPage()">Close</ion-button>
+            <ion-button slot="start" color="medium" shape="round" size="full" class="ion-margin-top" (click)="copy()">Copy</ion-button>
+          </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>
+</ion-content>

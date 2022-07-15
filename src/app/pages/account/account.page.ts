@@ -17,6 +17,7 @@ import { OverlayEventDetail } from '@ionic/core/components';
 export class AccountPage implements OnInit {
   @ViewChild(IonModal) modal: IonModal;
 
+  handlerMessage = "";
   importedMnemonic: string;
   inputMnemonic: string;
   
@@ -84,11 +85,7 @@ export class AccountPage implements OnInit {
   getAccountListFromStorage(responseToAny){
     return new Promise((resolve)=>{
       for(var i = 0; i<responseToAny.length; i++){
-        var accountStored:AccountStored = {
-         name:"",
-         addr:"",
-         mnemonic:"",
-        };
+       var accountStored:AccountStored = new AccountStored();
        type Temp = {
          [key:string]: any
        }
@@ -184,5 +181,17 @@ export class AccountPage implements OnInit {
     }
   }
 
+  changeAccount(account){
+    //mainAccount를 바꾼다.
+  }
+  changeAccountName(accountName){
+
+  }
+
+  goToExportPage(){
+    const navigationExtras: NavigationExtras = {
+    };
+    this.router.navigateByUrl('/export-list',navigationExtras);
+  }
 
 }
