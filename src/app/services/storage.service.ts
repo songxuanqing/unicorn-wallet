@@ -119,8 +119,8 @@ export class StorageService {
         var validPassword = await bcrypt.compare(encryptionKey,encryptedValue);
         if(validPassword){ //hash String과 입력한 값이 일치하는지 확인
           console.log("true?");
-          return response(true); //로그인 통과용 response
           this.hashedKey = encryptedValue; //전역변수로 선언된 hashedKey에 값 할당.
+          return response(true); //로그인 통과용 response
         }else{
           console.log("false?");
           return response(false);
@@ -167,6 +167,7 @@ export class StorageService {
       }else{
         k = this.hashedKey;
       }
+      console.log(this.hashedKey);
       console.log("key",key,"value",encryptedValue);
       console.log(String(k));
       console.log(String(k).padEnd(32, padding));

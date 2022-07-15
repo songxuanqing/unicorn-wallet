@@ -25,6 +25,7 @@ export class LoginPage implements OnInit {
         this.storageService.getDecryption("accounts",null).then(async(response)=>{
           var responseToAny:any = response;  
           this.account = await this.getAccountListFromStorage(responseToAny);
+          return resolve(true);
         });
       }
     })
