@@ -43,9 +43,14 @@ export class ConfirmPage implements OnInit {
 
 
   confirm(){
-    this.blockchainSDKService.sendTxn(this.sender,this.receiver,this.token_id,this.sent_amount).then(async(response)=>{
-      console.log(response);
-    });
+    if(this.token_id!=null){
+      this.blockchainSDKService.sendAssetTxn(this.sender,this.receiver,this.token_id,this.sent_amount).then(async(response)=>{
+        console.log(response);
+      });
+    }else{
+      //send
+    }
+
     const navigationExtras: NavigationExtras = {
       state: {
         txnParams:{
@@ -93,11 +98,22 @@ export class ConfirmPage implements OnInit {
   }
 
   getCurrentBalance(account_address, token_id){
-    this.apiService.getAddressAssetInfo(account_address, token_id).then(async (response) => {
-      console.log(response);
-      this.currentBalance = response['asset-holding'].amount;
-      return this.currentBalance;
-    });
+    if(this.token_id!=null){
+      this.apiService.getAddressAssetInfo(account_address, token_id).then((response) => {
+        console.log(response);
+        this.currentBalance = response['asset-holding'].amount;
+        return this.currentBalance;
+      });
+    }else{
+      this.apiService.getAccountInfo(account_address).then((response) => {
+        var accountData:any = response;
+        this.currentBalance = accountData.amount;
+        return this.currentBalance;
+      });
+    }
+    
   }
+
+  //https://www.youtube.com/watch?v=vhUjCLYlnMM&ab_channel=ArturChmaro&loop=0
 
 }

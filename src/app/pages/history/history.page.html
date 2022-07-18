@@ -8,7 +8,7 @@
   <ion-col>
     <ion-list>
       <ion-button color="primary" fill="clear">Back</ion-button>
-      <ion-button color="primary" fill="clear" id="open-modal" class="verticalBottom" (click)="getTokenList(account_address)">Search by Token</ion-button>
+      <ion-button color="primary" fill="clear" id="open-history-modal" class="verticalBottom" (click)="getTokenList(account_address)">Search by Token</ion-button>
       <ion-accordion-group>
         <ion-accordion *ngFor="let item of historyList">
           <ion-item slot="header" color="light" class="item-display">
@@ -42,7 +42,7 @@
   </ion-col>
   </ion-row>
 
-  <ion-modal #modal trigger="open-modal" [initialBreakpoint]="0.25" [breakpoints]="[0, 0.25, 0.5, 0.75]" (willDismiss)="onWillDismiss($event)">
+  <ion-modal trigger="open-history-modal" [initialBreakpoint]="0.25" [breakpoints]="[0, 0.25, 0.5, 0.75]" (willDismiss)="onWillDismiss($event)">
     <ng-template>
       <ion-content>
         <ion-list>

@@ -111,7 +111,7 @@ export class HistoryPage implements OnInit {
   parseAndPushTransactionHistory(httpResponse){
     if(this.nextToken==""){
       this.historyList = [];
-    }
+    };
     var responseToAny:any = httpResponse;
     this.nextToken = responseToAny['next-token'];
     responseToAny.transactions.forEach(item => {

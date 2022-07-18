@@ -11,7 +11,10 @@ import { Http } from '@capacitor-community/http';
 @Injectable({
   providedIn: 'root'
 })
+
 export class Blockchain2Service {
+  //http요청은 플랫폼에 별로 다른 http 요청 라이브러리를 사용한다.
+  //특히 안드로이드에서 cors에 대응하기 위해 플랫폼 api를 사용하는 라이브러리를 쓴다.
   base_path = "";
   indexer_path = "";
   constructor(
@@ -28,7 +31,7 @@ export class Blockchain2Service {
       }
     }
 
-  // Http Options
+  // chrome extension 개발용 angular Http요청 위한 옵션
   httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',
@@ -36,7 +39,7 @@ export class Blockchain2Service {
     })
   }
 
-  // Handle API errors
+  //chrome extension 개발용 angular Http요청 위한 api error 핸들링
   handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
       // A client-side or network error occurred. Handle it accordingly.
@@ -53,7 +56,8 @@ export class Blockchain2Service {
       'Something bad happened; please try again later.');
   };
 
-  // Example of a GET request
+  //트랜잭션 파라미터 가져오기
+  //거래 수수료 계산 사용
   getTxnParam = async() => {
     if(this.platform.is('capacitor')){
       var options = {
@@ -75,6 +79,7 @@ export class Blockchain2Service {
     }
   };
   
+  //Account 정보 가져오기. 보유한 자산, 계정잔고 등
   getAccountInfo = async(address) => {
     if(this.platform.is('capacitor')){
     var options = {
@@ -116,6 +121,8 @@ export class Blockchain2Service {
       ).toPromise();
     }
   }
+
+  
 
   getAddressAssetInfo = async(address,assetId) => {
     if(this.platform.is('capacitor')){
@@ -162,14 +169,19 @@ export class Blockchain2Service {
     }
   }
 
+  //특정 주소의 모든 거래기록을 가져온다.
+  //limit와 next param을 통해 나누어서 가져온다.
+  //요청을하면 next 토큰을 반환하여 다음 요청시 넘겨주면 다음 목록을 요청할수 있다. (무한 스크롤에 사용)
   getTransactionHistory = async(address,next_token)=>{
     if(this.platform.is('capacitor')){
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
-        headers: { 'Content-Type': 'application/json'},
-        params: { 'limit': '20','next':next_token },
+        headers: { 'Content-Type': 'application/json',
+        'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'},
+        params: { 'limit': '20','next':next_token},
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
+        console.log(response);
         return response.data;
       });
     }else{
@@ -189,11 +201,15 @@ export class Blockchain2Service {
     }
   }
 
+  //선택한 토큰의 거래 기록만 가져온다.
+  //asset-id param추가
+  //indexer사용
   getSelectedTokenTransactionHistory = async(address,asset_id,next_token)=>{
     if(this.platform.is('capacitor')){
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
-        headers: { 'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json',
+        'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'},
         params: { 'limit': '20','asset-id': asset_id.toString(),'next':next_token },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -216,11 +232,15 @@ export class Blockchain2Service {
     }
   }
 
+  //코인(암호화폐) 거래 기록만 가져온다.
+  //tx-type param추가
+  //indexer사용
   getCoinTransactionHistory = async(address,txn_type,next_token)=>{
     if(this.platform.is('capacitor')){
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
-        headers: { 'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json',
+        'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'},
         params: { 'limit': '20','tx-type': txn_type,'next':next_token },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{

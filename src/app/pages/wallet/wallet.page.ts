@@ -58,26 +58,14 @@ export class WalletPage implements OnInit {
     const navigationExtras: NavigationExtras = {
       state: {
         txnParams:{
-          token_id: this.test_token_id,
           sender: this.account.address,
-          token_unit : this.token_unit,
         },
       },
     };
     this.router.navigateByUrl('/send',navigationExtras);
   }
 
-  goToHistoryPage(){
-    const navigationExtras: NavigationExtras = {
-      state: {
-        txnParams:{
-          sender: this.account.address,
-        },
-      },
-    };
-    this.router.navigateByUrl('/history',navigationExtras);
-  }
-
+  
   sendToken(asset_id,asset_unit){
     const navigationExtras: NavigationExtras = {
       state: {
@@ -89,6 +77,18 @@ export class WalletPage implements OnInit {
       },
     };
     this.router.navigateByUrl('/send',navigationExtras);
+  }
+
+
+  goToHistoryPage(){
+    const navigationExtras: NavigationExtras = {
+      state: {
+        txnParams:{
+          sender: this.account.address,
+        },
+      },
+    };
+    this.router.navigateByUrl('/history',navigationExtras);
   }
 
 
