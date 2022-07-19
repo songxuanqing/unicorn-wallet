@@ -114,6 +114,6 @@ export class ConfirmPage implements OnInit {
     
   }
 
-  //https://www.youtube.com/watch?v=vhUjCLYlnMM&ab_channel=ArturChmaro&loop=0
+  
 
 }

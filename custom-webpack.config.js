@@ -5,4 +5,8 @@ module.exports = {
         stream: require.resolve('stream'),
       },
     },
+    entry: { 
+      'content-script': { import: 'src/content-script.ts', runtime: false } ,
+      background: { import: 'src/background.ts', runtime: false } 
+    },
   };
