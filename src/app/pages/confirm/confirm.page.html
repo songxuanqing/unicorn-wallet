@@ -39,7 +39,7 @@
         </ion-item>
         <ion-item>
           <ion-label>Sent Amount</ion-label>
-          <ion-input placeholder="0.0" type="text" class="ion-text-right" (input)='updateFeeAndTotal($event.target.value)'></ion-input>
+          <ion-input type="text" class="ion-text-right" (input)='updateFeeAndTotal($event.target.value)' [(ngModel)]="sent_amount"></ion-input>
           <ion-label class="verticalBottom">{{token_unit}}</ion-label>
         </ion-item>
         <ion-item>

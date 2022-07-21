@@ -5,6 +5,11 @@ import { Blockchain2Service } from '../../services/blockchain2.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { HeaderService } from '../../services/header.service';
+import { BuyService } from '../../services/buy.service';
+import { PriceService } from '../../services/price.service';
+import { StorageService } from '../../services/storage.service';
+import getSymbolFromCurrency from 'currency-symbol-map';
+import {Currency} from '../../models/currency';
 
 @Component({
   selector: 'app-wallet',
@@ -18,6 +23,12 @@ export class WalletPage implements OnInit {
   public NFTInfo:Array<any> = [];
   public token_unit:string = "";
   public isBackFromTxn:boolean = false;
+  public buyUrlList:Array<any> = [];
+  public balanceToCurrency:number;
+  public balanceToCurrencyToString:string;
+  
+  currency = 'USD'; //test currency, 이후 setting 값에서 가져올 예정.
+  symbol = '$';
   test_token_id = 94434081;
   //test_account='5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU';
   constructor(
@@ -26,6 +37,9 @@ export class WalletPage implements OnInit {
     private router:Router,
     private route:ActivatedRoute,
     public toastController: ToastController,
+    private buyService:BuyService,
+    private priceService:PriceService,
+    private storageService:StorageService,
   ) {
     this.account = new Account();
   }
@@ -38,6 +52,7 @@ export class WalletPage implements OnInit {
       {
        console.log("txnParam",response)
       })
+    this.createBuyUrls();
   }
 
   openMenu() {
@@ -117,6 +132,15 @@ export class WalletPage implements OnInit {
       console.log(this.assetInfo);
       this.account.assets = this.assetInfo;
       console.log(this.account);
+      //저장소에서 사용자 지정 통화를 가져온다.
+      await this.getSelectedCurrency();
+      //주어진 통화기준 알고랜드 단가 가져와서 현재 가지고 있는 알고량에 곱하기
+      //전체 알고를 주어진 통화로 치환.
+      var unitPrice = await this.getUnitPriceWithCurrency(this.currency);
+      this.balanceToCurrency = this.account.amount * +unitPrice;
+      this.balanceToCurrency = Math.round(this.balanceToCurrency);
+      this.balanceToCurrencyToString = this.balanceToCurrency.toString()
+      .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
       return this.account;
     });
   }
@@ -164,4 +188,58 @@ export class WalletPage implements OnInit {
     const { role } = await toast.onDidDismiss();
     console.log('onDidDismiss resolved with role', role);
   }
+  
+  //buy modal
+  createBuyUrls(){
+    this.buyService.imgUrls.forEach(async item=>{
+      var url:any;
+      if(item.marketName=="wyre"){
+        url = await this.buyService.createWyreUrl(this.account.address);
+      }
+      var market = {
+        marketName:item.marketName,
+        imgUrl:item.imgUrl,
+        url:url,
+      }
+      this.buyUrlList.push(market);
+    })
+  }
+
+  //주어진 통화기준 알고랜드 단가 가져오기
+  getUnitPriceWithCurrency(currency){
+    return new Promise(resolve=>{
+      this.priceService.getUnitPriceWithCurrency(currency).then(response=>{
+        var responseToAny:any = response;
+        var unitPrice = +responseToAny.coin.price;
+        return resolve(unitPrice);
+      });
+    });
+  }
+
+   //db에서 과거에 선택했던 통화 가져오기
+   getSelectedCurrency(){
+    return new Promise(resolve=>{
+      try{
+        this.storageService.get("currency").then(response=>{
+          var responseJson = JSON.parse(response);
+          this.currency = responseJson.currency;
+          this.symbol = responseJson.symbol;
+          resolve(true);
+        });
+      }catch{
+        //만약 최초 사용자여서 currency 저장 기록이 없다면
+        //USD를 default로 생성해서 저장 후 다시 불러온다.
+        var currencyClass = new Currency();
+        var currencySelected = currencyClass.USD;
+        this.storageService.get("currency").then(response=>{
+          var responseJson = JSON.parse(response);
+          this.currency = responseJson.currency;
+          this.symbol = responseJson.symbol;
+          resolve(false);
+        });
+      }
+    })
+  }
+
+
 }

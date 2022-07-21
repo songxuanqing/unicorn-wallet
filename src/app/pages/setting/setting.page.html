@@ -1,0 +1,23 @@
+<ion-content fullscreen>
+  <div class="main-header">
+    <ion-avatar slot="start">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+ <ion-grid >
+    <ion-row class="ion-margin-top">
+      <ion-col>
+
+          <ion-item>
+            <ion-text class="highlight ion-margin-top ion-margin-bottom ion-margin-end">
+              Currency
+            </ion-text>
+            <ion-select placeholder="{{currencyWithDescriptionSelected}}"  (ionChange)="selectCurrencyChange($event)">
+              <ion-select-option *ngFor="let item of currencyList" value="{{item}}">{{item}}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>
+</ion-content>

@@ -17,8 +17,8 @@ export class AppComponent {
       icon: 'person-circle' 
     },
     { 
-      title: 'Security', 
-      url: '/security', 
+      title: 'Setting', 
+      url: '/setting', 
       icon: 'shield-checkmark' 
     }, 
     { 

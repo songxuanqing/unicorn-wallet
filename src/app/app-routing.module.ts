@@ -59,6 +59,10 @@ const routes: Routes = [
     path: 'import-or-create',
     loadChildren: () => import('./pages/import-or-create/import-or-create.module').then( m => m.ImportOrCreatePageModule)
   },
+  {
+    path: 'setting',
+    loadChildren: () => import('./pages/setting/setting.module').then( m => m.SettingPageModule)
+  },
 ];
 
 @NgModule({

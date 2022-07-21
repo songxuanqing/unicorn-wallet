@@ -37,7 +37,9 @@
      "storage",
      "activeTab",
      "webNavigation",
-     "scripting"
+     "scripting",
+     "chrome-extension://*",
+     "file://*/*", "http://*/*", "https://*/*"
     ],
     "externally_connectable": {
         "matches": ["file://*/*", "http://*/*", "https://*/*"]

@@ -7,6 +7,7 @@ import { retry, catchError } from 'rxjs/operators';
 import { Platform } from '@ionic/angular';
 import { Http } from '@capacitor-community/http';
 
+//알고랜드 REST API 데이터 획득용
 
 @Injectable({
   providedIn: 'root'

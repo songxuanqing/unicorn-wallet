@@ -48,6 +48,7 @@
     "cordova-plugin-file-opener2": "^3.0.5",
     "crypto-browserify": "^3.12.0",
     "crypto-js": "^4.1.1",
+    "currency-symbol-map": "^5.1.0",
     "jetifier": "^2.0.0",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.2.6",

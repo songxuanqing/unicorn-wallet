@@ -12,6 +12,8 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { File } from '@ionic-native/file/ngx';
 import { StorageService } from './storage.service';
 
+//알고랜드 SDK 연결 및 데이터 획득용
+
 @Injectable({
   providedIn: 'root'
 })
@@ -93,7 +95,7 @@ handleError(error: HttpErrorResponse) {
 
   //거래정보를 byte로 변환. 거래 수수료 계산 목적
   //수수료는 [최소 수수료 1000 마이크로 알고] 와 [거래정보 byte*byte당 수수료] 중 더 큰것으로 계산
-  txnToByte = async(from_mnemonic:string,to_address:string,token_id:number,sent_amount:number) =>  {
+  txnToByte = async(from_mnemonic:string,to_address:string,token_id:number,sent_amount:number,isAssetTransfer:boolean) =>  {
     return new Promise(async(resolve)=>{
       var configJsonUnknown = await this.getConfigJson();
       var configJson:any = configJsonUnknown;
@@ -121,21 +123,32 @@ handleError(error: HttpErrorResponse) {
       var enc = new TextEncoder();
       var note = enc.encode("Hello World");
       var amount = sent_amount;
-      var tokenID = token_id;
-      console.log(tokenID);
-      var xtxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
-          sender, 
-          receiver,
-          closeRemainderTo, 
-          revocationTarget,
-          amount,  
-          note, 
-          tokenID, 
-          params);
-      var rawSignedTxn = xtxn.signTxn(devPK);
-      var txId = xtxn.txID().toString();
+      var txn;
+      if(isAssetTransfer){
+        var tokenID = token_id;
+        txn = algosdk.makeAssetTransferTxnWithSuggestedParams(
+            sender, 
+            receiver,
+            closeRemainderTo, 
+            revocationTarget,
+            amount,  
+            note, 
+            tokenID, 
+            params);
+      }else{
+        txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+          from: sender, 
+          to: receiver, 
+          amount: amount, 
+          note: note, 
+          suggestedParams: params
+        });
+      }
+      
+      var rawSignedTxn = txn.signTxn(devPK);
+      var txId = txn.txID().toString();
       console.log("Signed transaction with txID: %s", txId);
-      var pay_txn_bytes = algosdk.encodeObj(xtxn.get_obj_for_encoding());
+      var pay_txn_bytes = algosdk.encodeObj(txn.get_obj_for_encoding());
       return resolve(pay_txn_bytes.length);
     })
   }
@@ -158,9 +171,6 @@ handleError(error: HttpErrorResponse) {
       var closeRemainderTo = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
       var algodClientUnknown = await this.getConnection();
       var algodClient:any = algodClientUnknown;
-      // type Params = {
-      //   [key:string]:any;
-      // }
       var paramsUnknown = await algodClient.getTransactionParams().do();
       var params:any = paramsUnknown;
       params.fee = algosdk.ALGORAND_MIN_TX_FEE;
@@ -305,8 +315,8 @@ getAccount = async(mnemonic) => {
 
 //계정생성하기
 //생경한 결과 생성된 퍼블릭 주소와 니모닉을 콜론으로 연결하여 하나의 string으로 반환
-createAccount = async () => {
-  return new Promise(async(resolve)=>{
+createAccount = () => {
+  return new Promise((resolve)=>{
     try {  
       const myaccount = algosdk.generateAccount();
       let account_mnemonic = algosdk.secretKeyToMnemonic(myaccount.sk);
@@ -319,6 +329,20 @@ createAccount = async () => {
     }
   })
 }
+
+//유효한 주소인지 확인하기 (transaction 요청시 send page)
+ isValidAddress = async(address) => {
+  return new Promise((resolve,reject)=>{
+    try{
+      var isValid = algosdk.isValidAddress(address); //boolean반환
+      return resolve(isValid);
+    }catch(e){
+      return reject(e);
+    }
+  })
+ }
+
+
 
 //json으로 저장된 정보 가져오기
 //capacitor런타임의 경우 파일로 저장된 정보를 가져와서 읽기
@@ -370,4 +394,6 @@ createAccount = async () => {
       ).toPromise();
     }
   }
+
+
 }

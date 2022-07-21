@@ -7,10 +7,10 @@ window.addEventListener("message", (event) => {
     return;
   }
 
-  if (event.data.type && (event.data.type == "UNICORN_WALLET")) {
-    console.log("Content script received: " + event.data.text);
-    chrome.runtime.sendMessage({greeting: "hello"}, function(response) {
-        console.log(response.farewell);
+  if (event.data.type && (event.data.type == "UNICORN_WALLET_SEND")) {
+    console.log("Content script received: " + event.data);
+    chrome.runtime.sendMessage({type:"sendTxn", data: event.data}, function(response) {
+        console.log(response.data);
       });
   }
 }, false);

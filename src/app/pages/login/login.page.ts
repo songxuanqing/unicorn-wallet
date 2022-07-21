@@ -37,14 +37,21 @@ export class LoginPage implements OnInit {
     var isConfirmed = await this.confirm(pw);
     console.log("isConfirmed",isConfirmed);
     if(isConfirmed){
+      //background.js에서 다른 웹사이트로부터 받은 
+      //송수신자,금액 데이터를 storage에 저장함. 
+      //따라서 storage 정보가 있을 경우 confirm page로 이동.
+      var sendTxnStoredValue = await this.storageService.get('sendTxn');
       const navigationExtras: NavigationExtras = {
         state: {
           isLogin:true,
           account:this.account,
         },
       };
-      console.log(navigationExtras);
-      this.router.navigateByUrl('/wallet',navigationExtras);
+      if(sendTxnStoredValue!=null){
+        this.router.navigateByUrl('/confirm',navigationExtras);
+      }else{
+        this.router.navigateByUrl('/wallet',navigationExtras);
+      }
     }
   }
 

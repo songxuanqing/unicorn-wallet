@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from '../../services/blockchain.service';
+import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
-
+import { ToastController } from '@ionic/angular';
 
 @Component({
   selector: 'app-send',
@@ -19,7 +19,8 @@ export class SendPage implements OnInit {
   constructor(
     private router:Router,
     private route:ActivatedRoute,
-    private apiService: ApiService,
+    private blockchainSDKService: Blockchain3Service,
+    public toastController: ToastController,
     ) {
 
    }
@@ -44,6 +45,44 @@ export class SendPage implements OnInit {
       },
     };
     this.router.navigateByUrl('/confirm',navigationExtras);
+  }
+
+  //입력한 주소가 유효한지 확인
+  //유효할 경우 자동으로 다음 페이지로 넘어감
+  async isValidAddress(address){
+    this.blockchainSDKService.isValidAddress(address).then(resolve=>{
+      if(isValid){
+        this.goToConfirmPage(address);
+      }
+    }).then(reject=>{
+      //유효하지 않은 주소 에러 발생 시 메세지 띄우고 입력창 초기화
+        this.resentToastWithOptions(reject);
+        this.receiver = "";
+    });
+  }
+
+  //최근 보낸 주소 가져오기
+  
+
+  async presentToastWithOptions(e) {
+    const toast = await this.toastController.create({
+      message: e,
+      duration: 500,
+      icon: 'information-circle',
+      position: 'top',
+      buttons: [
+         {
+          text: 'DONE',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+    await toast.present();
+    const { role } = await toast.onDidDismiss();
+    console.log('onDidDismiss resolved with role', role);
   }
 
 }
