@@ -67,6 +67,7 @@ export class ConfirmPage implements OnInit {
 
 
   async confirm(){
+    //토큰아이디가 있을 경우 asset 보내는 txn을 아닐 경우 일반 txn요청
     if(this.token_id!=null){
       this.blockchainSDKService.sendAssetTxn(this.sender,this.receiver,this.token_id,this.sent_amount).then(async(response)=>{
         console.log(response);
@@ -76,6 +77,10 @@ export class ConfirmPage implements OnInit {
         console.log(response);
       });
     }
+    //최근 보낸 주소 저장.
+    this.setRecentlySentAddresses(this.receiver);
+    //만약 외부에서 요청한 것일 경우 sendTxn 데이터가 저장되어 있을 것이므로
+    //해당 데이터가 DB에 있다면 wallet으로 이동하고, DB 초기화
     var sendTxnStoredValue = await this.storageService.get("sendTxn");
     if(sendTxnStoredValue!=null){
       const navigationExtras: NavigationExtras = {
@@ -98,7 +103,41 @@ export class ConfirmPage implements OnInit {
       };
       this.router.navigateByUrl('/wallet',navigationExtras);
     }
-}
+  }
+
+  //db에 최근 보낸 주소를 가져온 다음, 현재 항목을 추가해서 다시 저장.
+  setRecentlySentAddresses(receiver){
+    return new Promise(resolve=>{
+      this.storageService.get("recentlySent").then(response=>{
+        //최초 사용일 경우 저장소에 값이 없으므로, 빈 배열 생성
+        var recentlySentAddresses;
+        if(response!=null){
+          var responseJson = JSON.parse(response);
+          recentlySentAddresses = responseJson.addressList; //{addressList:[A,B,C]}
+        }else{
+          recentlySentAddresses = [];
+        }
+        var isExistSameAddress = false;
+        //기존에 저장된 주소에서 현재 전송한 주소와 동일한 주소가 있는지 확인
+        //하나라도 존재할 경우 true이므로, 추가 저장하지 않는다.
+        //아닐 경우 배열에 추가한 후 저장한다.
+        recentlySentAddresses.forEach(item=>{ 
+          if(item!=receiver){
+            isExistSameAddress = false; 
+          }else{
+            isExistSameAddress = true;
+          }
+        });
+        //최초 생성일 경우 빈 배열이므로, forEach문에 해당하지 않아, isExistSameAddress = false;
+        if(!isExistSameAddress){
+          recentlySentAddresses.push(receiver); 
+        };
+        var recentlySentObj = {addressList:recentlySentAddresses}; //{addressList:[A,B,C]}
+        var recentlySentToString = JSON.stringify(recentlySentObj); //스트링으로 변환해서 저장
+        this.storageService.set("recentlySent",recentlySentToString);
+      });
+    });
+  };
 
   updateFeeAndTotal(inputAmount){
     this.getFee();
@@ -145,16 +184,16 @@ export class ConfirmPage implements OnInit {
   }
 
   getCurrentBalance(account_address, token_id){
-    if(this.token_id!=null){
-      this.apiService.getAccountInfo(account_address).then((response) => {
-        var accountData:any = response;
-        this.currentBalance = accountData.amount;
-        return this.currentBalance;
-      });
-    }else{
+    if(this.token_id!=null || this.token_id!=undefined){
       this.apiService.getAddressAssetInfo(account_address, token_id).then((response) => {
         console.log(response);
         this.currentBalance = response['asset-holding'].amount;
+        return this.currentBalance;
+      });
+    }else{
+      this.apiService.getAccountInfo(account_address).then((response) => {
+        var accountData:any = response;
+        this.currentBalance = accountData.amount;
         return this.currentBalance;
       });
     }

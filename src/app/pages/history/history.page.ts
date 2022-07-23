@@ -19,6 +19,7 @@ export class HistoryPage implements OnInit {
   public assetInfo:Array<Token> = [];
   public selectedTokenAssetID:number|null = 0.1;
   public nextToken = "";
+  public isHistoryExist:boolean = true; //거래기록 여부 확인. true일 경우 거래기록 없다는 메세지 hidden도 true이다.
 
   @ViewChild(IonModal) modal: IonModal;
   @ViewChild(IonInfiniteScroll) infiniteScroll: IonInfiniteScroll;
@@ -27,7 +28,6 @@ export class HistoryPage implements OnInit {
     private route:ActivatedRoute,
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service) { 
-
 
     }
 
@@ -169,14 +169,8 @@ export class HistoryPage implements OnInit {
       if(item['tx-type']=="axfer"){
         txnHistory = {
           id:id,
-          // ['confirmed-round']:item['confirmed-round'],
-          // ['first-valid']:item['first-valid'],
-          // ['last-valid']:item['last-valid'],
           sender:sender,
           fee:fee,
-          // ['tx-type']:item['tx-type'],
-          // ['genesis-hash']:item['genesis-hash'],
-          // ['round-time']:item['round-time'],
           receiver:item['asset-transfer-transaction'].receiver,
           amount:0,
           amountAxfer:item['asset-transfer-transaction'].amount,
@@ -194,14 +188,8 @@ export class HistoryPage implements OnInit {
       }else if(item['tx-type']=="pay"){
         txnHistory = {
           id:id,
-          // ['confirmed-round']:item['confirmed-round'],
-          // ['first-valid']:item['first-valid'],
-          // ['last-valid']:item['last-valid'],
           sender:sender,
           fee:fee,
-          // ['tx-type']:item['tx-type'],
-          // ['genesis-hash']:item['genesis-hash'],
-          // ['round-time']:item['round-time'],
           receiver:item['payment-transaction'].receiver,
           amount:item['payment-transaction'].amount,
           amountAxfer:0,
@@ -219,14 +207,8 @@ export class HistoryPage implements OnInit {
       }else{
         txnHistory = {
           id:id,
-          // ['confirmed-round']:item['confirmed-round'],
-          // ['first-valid']:item['first-valid'],
-          // ['last-valid']:item['last-valid'],
           sender:sender,
           fee:fee,
-          // ['tx-type']:item['tx-type'],
-          // ['genesis-hash']:item['genesis-hash'],
-          // ['round-time']:item['round-time'],
           receiver:null,
           amount:0,
           amountAxfer:0,
@@ -245,6 +227,13 @@ export class HistoryPage implements OnInit {
       console.log(txnHistory);
       this.historyList.push(txnHistory);
     });
+    //만약 거래기록이 하나도 없으면 거래기록이 없다는 메세지 활성화
+    //hidden=isHistoryExist를 활성화 한다.
+    if(this.historyList.length==0){
+      this.isHistoryExist = false;
+    }else{
+      this.isHistoryExist = true;
+    }
   }
 
   getTransactionHistory(address,next_token){

@@ -67,6 +67,7 @@
       <ion-list-header>
         <ion-label color="light">TOKENS</ion-label>
       </ion-list-header>
+      <ion-note [hidden]="isTokenHoldings">There is no TOKEN you hold</ion-note>
       <ion-item lines="none" *ngFor="let item of tokenInfo" (click)="sendToken(item['asset-id'],item['unit-name'])">
         <ion-icon slot="start" name="sparkles" color="primary"></ion-icon>
         <ion-label size="large" class="ion-text-wrap">
@@ -82,6 +83,7 @@
     <ion-list-header>
       <ion-label color="light">NFTs</ion-label>
     </ion-list-header>
+    <ion-note [hidden]="isNFTHoldings"> There is no NFT you hold</ion-note>
     <ion-row class="ion-margin-horizontal">
       <ion-col *ngFor="let item of NFTInfo" size="6">
         <ion-card class="ion-text-center">

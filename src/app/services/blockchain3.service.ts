@@ -307,8 +307,8 @@ getAccount = async(mnemonic) => {
       let account = algosdk.mnemonicToSecretKey(mnemonic);
       resolve(account);
       console.log(account);
-    }catch(err){
-      reject(err);
+    }catch(e){
+      reject(e);
     }
   })
 }
@@ -335,9 +335,12 @@ createAccount = () => {
   return new Promise((resolve,reject)=>{
     try{
       var isValid = algosdk.isValidAddress(address); //boolean반환
-      return resolve(isValid);
+      resolve(isValid);
     }catch(e){
-      return reject(e);
+      if(e==null||e==""){
+        e = "It is invalid";
+      }
+      reject(e);
     }
   })
  }

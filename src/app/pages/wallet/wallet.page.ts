@@ -26,6 +26,8 @@ export class WalletPage implements OnInit {
   public buyUrlList:Array<any> = [];
   public balanceToCurrency:number;
   public balanceToCurrencyToString:string;
+  public isTokenHoldings:boolean = true; //토큰보유여부, 보유할 경우(true), hidden된다.(hidden=true)
+  public isNFTHoldings:boolean = true;// NFT보유여부, 보유할 경우(true), hidden된다.(hidden=true)
   
   currency = 'USD'; //test currency, 이후 setting 값에서 가져올 예정.
   symbol = '$';
@@ -113,7 +115,8 @@ export class WalletPage implements OnInit {
       console.log(accountData.assets);
       this.account.address = accountData.address;
       this.account.amount = accountData.amount;
-      accountData.assets.forEach(async (item)=>{
+      for(var i=0; i<accountData.assets.length; i++){
+        var item = accountData.assets[i];
         var token = new Token();
         token.amount = item.amount;
         token['asset-id'] = item['asset-id'];
@@ -128,10 +131,24 @@ export class WalletPage implements OnInit {
           }
           this.NFTInfo.push(token);
         }
-      });
+      }
       console.log(this.assetInfo);
       this.account.assets = this.assetInfo;
       console.log(this.account);
+      //만약 tokenInfo 또는 NFTInfo배열이 길이가 0이면, 보유한 토큰/NFT가 없습니다 메세지 표시용
+      //accountData.assets 을 forEach 함수의 콜백이 비동기 함수일 경우, 
+      //정확한 length값을 받을수 없어 for...of문으로 코딩
+      if(this.tokenInfo.length>0){ 
+        this.isTokenHoldings = true;
+      }else{
+        this.isTokenHoldings = false;
+      }
+      if(this.NFTInfo.length>0){
+        this.isNFTHoldings = true;
+      }else{
+        this.isNFTHoldings = false;
+      }
+
       //저장소에서 사용자 지정 통화를 가져온다.
       await this.getSelectedCurrency();
       //주어진 통화기준 알고랜드 단가 가져와서 현재 가지고 있는 알고량에 곱하기
@@ -140,7 +157,7 @@ export class WalletPage implements OnInit {
       this.balanceToCurrency = this.account.amount * +unitPrice;
       this.balanceToCurrency = Math.round(this.balanceToCurrency);
       this.balanceToCurrencyToString = this.balanceToCurrency.toString()
-      .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+      .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","); //천단위 표시
       return this.account;
     });
   }
@@ -231,6 +248,11 @@ export class WalletPage implements OnInit {
         //USD를 default로 생성해서 저장 후 다시 불러온다.
         var currencyClass = new Currency();
         var currencySelected = currencyClass.USD;
+        var currency = 'USD';
+        var symbol = getSymbolFromCurrency(currency);
+        var currencyValue = {currencyWithDescription:currencySelected, currency:currency, symbol:symbol};
+        var currencyValueToString = JSON.stringify(currencyValue); //스트링변환해서 저장
+        this.storageService.set("currency",currencyValueToString);
         this.storageService.get("currency").then(response=>{
           var responseJson = JSON.parse(response);
           this.currency = responseJson.currency;

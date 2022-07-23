@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   selector: 'app-send',
@@ -10,7 +11,7 @@ import { ToastController } from '@ionic/angular';
 })
 
 export class SendPage implements OnInit {
-  public recentlySentAddresses:string[] = ['CSWVHEEZDZQR452LEYCJGNBRDZU7SSKANOA32OPOKNBMYJSAV5BNZEXIXA','Q7LS5VUYTPV7NKMMKFT22Z3A2DWSHUQQA74ILF7OXRKMN3HRQ7VC57EELU']
+  public recentlySentAddresses:Array<string> = [];
   public sender:string;
   public receiver:string;
   public token_id:number;
@@ -21,6 +22,7 @@ export class SendPage implements OnInit {
     private route:ActivatedRoute,
     private blockchainSDKService: Blockchain3Service,
     public toastController: ToastController,
+    private storageService: StorageService,
     ) {
 
    }
@@ -31,6 +33,7 @@ export class SendPage implements OnInit {
     this.sender = routerState.txnParams.sender;
     this.token_id = routerState.txnParams.token_id;
     this.token_unit = routerState.txnParams.token_unit;
+    this.getRecentlySentAddresses();
   }
 
   goToConfirmPage(receiver_address){
@@ -50,18 +53,32 @@ export class SendPage implements OnInit {
   //입력한 주소가 유효한지 확인
   //유효할 경우 자동으로 다음 페이지로 넘어감
   async isValidAddress(address){
-    this.blockchainSDKService.isValidAddress(address).then(resolve=>{
+    this.blockchainSDKService.isValidAddress(address)
+    .then(response=>{
+      var isValid = response;
       if(isValid){
         this.goToConfirmPage(address);
       }
-    }).then(reject=>{
+    })
+    .then(reject=>{
       //유효하지 않은 주소 에러 발생 시 메세지 띄우고 입력창 초기화
-        this.resentToastWithOptions(reject);
+        this.presentToastWithOptions(reject);
         this.receiver = "";
     });
   }
 
   //최근 보낸 주소 가져오기
+  getRecentlySentAddresses(){
+    this.storageService.get("recentlySent").then(response=>{
+      if(response!=null){
+        var responseJson = JSON.parse(response);
+        var array = responseJson.addressList; //{addressList:[A,B,C]}
+        array.forEach(item=>{
+          this.recentlySentAddresses.push(item);
+        })
+      }
+    });
+  }
   
 
   async presentToastWithOptions(e) {

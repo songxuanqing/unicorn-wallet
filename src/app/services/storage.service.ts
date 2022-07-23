@@ -89,7 +89,10 @@ export class StorageService {
         });
         }
         else if(key=="recentlySent"){
-
+          chrome.storage.local.get([key], function(result) {
+            console.log("result.keyForUser",result)
+            return resolve(result.recentlySent);
+        });
         }
         else if(key=="currency"){
           chrome.storage.local.get([key], function(result) {
