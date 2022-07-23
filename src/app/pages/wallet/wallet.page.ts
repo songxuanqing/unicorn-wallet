@@ -9,7 +9,7 @@ import { BuyService } from '../../services/buy.service';
 import { PriceService } from '../../services/price.service';
 import { StorageService } from '../../services/storage.service';
 import getSymbolFromCurrency from 'currency-symbol-map';
-import {Currency} from '../../models/currency';
+import { Currency } from '../../const/currency';
 
 @Component({
   selector: 'app-wallet',
@@ -50,10 +50,6 @@ export class WalletPage implements OnInit {
     this.account.address = routerState.account.addr;
     this.account.name = routerState.account.name;
     this.getAccountInfo(this.account.address);
-    this.apiService.getTxnParam().then((response) =>
-      {
-       console.log("txnParam",response)
-      })
     this.createBuyUrls();
   }
 
@@ -109,7 +105,9 @@ export class WalletPage implements OnInit {
   }
 
 
-  getAccountInfo(account_address) {
+  async getAccountInfo(account_address) {
+    //rest api 서비스의 변수들 먼저 생성.
+    await this.apiService.setNetworkVariables();
     this.apiService.getAccountInfo(account_address).then(async (response) => {
       var accountData:any = response;
       console.log(accountData.assets);
@@ -236,30 +234,30 @@ export class WalletPage implements OnInit {
    //db에서 과거에 선택했던 통화 가져오기
    getSelectedCurrency(){
     return new Promise(resolve=>{
-      try{
         this.storageService.get("currency").then(response=>{
           var responseJson = JSON.parse(response);
-          this.currency = responseJson.currency;
-          this.symbol = responseJson.symbol;
-          resolve(true);
+          if(Object.keys(responseJson).length > 0){
+            this.currency = responseJson.currency;
+            this.symbol = responseJson.symbol;
+            return resolve(true);
+          }else{
+            //만약 최초 사용자여서 currency 저장 기록이 없다면
+            //USD를 default로 생성해서 저장 후 다시 불러온다.
+            var currencyClass = new Currency();
+            var currencySelected = currencyClass.USD;
+            var currency = 'USD';
+            var symbol = getSymbolFromCurrency(currency);
+            var currencyValue = {currencyWithDescription:currencySelected, currency:currency, symbol:symbol};
+            var currencyValueToString = JSON.stringify(currencyValue); //스트링변환해서 저장
+            this.storageService.set("currency",currencyValueToString);
+            this.storageService.get("currency").then(response=>{
+              var responseJson = JSON.parse(response);
+              this.currency = responseJson.currency;
+              this.symbol = responseJson.symbol;
+              return resolve(false);
+            });
+          }
         });
-      }catch{
-        //만약 최초 사용자여서 currency 저장 기록이 없다면
-        //USD를 default로 생성해서 저장 후 다시 불러온다.
-        var currencyClass = new Currency();
-        var currencySelected = currencyClass.USD;
-        var currency = 'USD';
-        var symbol = getSymbolFromCurrency(currency);
-        var currencyValue = {currencyWithDescription:currencySelected, currency:currency, symbol:symbol};
-        var currencyValueToString = JSON.stringify(currencyValue); //스트링변환해서 저장
-        this.storageService.set("currency",currencyValueToString);
-        this.storageService.get("currency").then(response=>{
-          var responseJson = JSON.parse(response);
-          this.currency = responseJson.currency;
-          this.symbol = responseJson.symbol;
-          resolve(false);
-        });
-      }
     })
   }
 

@@ -15,6 +15,15 @@
               <ion-select-option *ngFor="let item of currencyList" value="{{item}}">{{item}}</ion-select-option>
             </ion-select>
           </ion-item>
+
+          <ion-item>
+            <ion-text class="highlight ion-margin-top ion-margin-bottom ion-margin-end">
+              Network
+            </ion-text>
+            <ion-select placeholder="{{networkSelected}}"  (ionChange)="selectNetworkChange($event)">
+              <ion-select-option *ngFor="let item of networkList" value="{{item}}">{{item}}</ion-select-option>
+            </ion-select>
+          </ion-item>
           
       </ion-col>
     </ion-row>

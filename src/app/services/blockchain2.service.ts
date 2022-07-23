@@ -6,6 +6,8 @@ import { Observable, throwError } from 'rxjs';
 import { retry, catchError } from 'rxjs/operators';
 import { Platform } from '@ionic/angular';
 import { Http } from '@capacitor-community/http';
+import { StorageService } from '../services/storage.service';
+import { Network } from '../const/network';
 
 //알고랜드 REST API 데이터 획득용
 
@@ -16,29 +18,89 @@ import { Http } from '@capacitor-community/http';
 export class Blockchain2Service {
   //http요청은 플랫폼에 별로 다른 http 요청 라이브러리를 사용한다.
   //특히 안드로이드에서 cors에 대응하기 위해 플랫폼 api를 사용하는 라이브러리를 쓴다.
-  base_path = "";
+  algod_path = "";
+  algod_token = "";
   indexer_path = "";
+  indexer_token = "";
+  httpOptions = {};
   constructor(
     private http: HttpClient,
-     public platform: Platform) {
-      //최종 배포시 url를 블록체인 노드 url로 바꿔야함.
-      //특히 localhost는 heroku프록시 써야 할 수도 있음.
-      if (this.platform.is('capacitor')) {
-        this.base_path = "http://10.0.2.2:8080";
-        this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
-      } else {
-        this.base_path = 'http://localhost:8080';
-        this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
-      }
+    public platform: Platform,
+    private storageService:StorageService,) {
+      //base path 설정을 위해 db에 저장된 network정보 가져오기
+      //var responseToAny:any = await this.getNetwork();
+      // this.getNetwork().then(response=>{
+      //   var responseToAny:any = response;
+      //   this.algod_path = responseToAny.algodIp;
+      //   this.indexer_path = responseToAny.indexer_path;
+      //   this.algod_token = responseToAny.algodToken;
+      //   this.indexer_token = responseToAny.indexer_token;
+
+      // // if (this.platform.is('capacitor')) {
+      // //   this.algod_path = "http://10.0.2.2:8080";
+      // //   this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
+      // // } else {
+      // //   this.algod_path = 'http://localhost:8080';
+      // //   this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
+      // // }
+      // });
     }
 
-  // chrome extension 개발용 angular Http요청 위한 옵션
-  httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59'
-    })
+  setNetworkVariables(){
+    return new Promise(resolve=>{
+      this.getNetwork().then(response=>{
+        var responseToAny:any = response;
+        this.algod_path = responseToAny.algodIp;
+        this.indexer_path = responseToAny.indexer_path;
+        this.algod_token = responseToAny.algodToken;
+        this.indexer_token = responseToAny.indexer_token;
+        console.log(this.algod_token,"this.algod_token");
+        this.httpOptions = {
+        headers:{'Content-Type': 'application/json','x-api-key': this.algod_token},
+        };
+        return resolve(true);
+      });
+    });
   }
+
+  getNetwork(){
+    return new Promise(resolve=>{
+        this.storageService.get("network").then(async response=>{
+          var responseJson = JSON.parse(response);
+          if(Object.keys(responseJson).length > 0){
+            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+            return resolve(network);
+          }else{
+            //만약 최초 사용자여서 network 저장 기록이 없다면
+            //default로 생성해서 저장 후 다시 불러온다.
+            var networkObj = Network.NETWORK_TYPE_TO_IP_MAP.TestNet;
+            var networkValue = {network:networkObj,};
+            var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
+            await this.storageService.set("network",networkValueToString);
+            this.storageService.get("network").then(response=>{
+            var responseJson = JSON.parse(response);
+            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+            console.log("getNetwork",network);
+            return resolve(network);
+          });
+          }
+        });
+    })
+  }  
+
+  // chrome extension 개발용 angular Http요청 위한 옵션
+  // httpOptions = {
+  //   headers: new HttpHeaders({'Content-Type': 'application/json','x-api-key': this.algod_token}),
+  //   // headers = headers.append('Content-Type', 'application/json');
+  //   // headers = headers.append('x-api-key', this.algod_token);
+  //   // headers: new HttpHeaders({
+  //   //   'Content-Type': 'application/json',
+  //   //   'x-api-key': `${this.algod_token}`
+  //   //   //'x-api-key': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59'
+  //   // })
+  // }
+
+
 
   //chrome extension 개발용 angular Http요청 위한 api error 핸들링
   handleError(error: HttpErrorResponse) {
@@ -57,36 +119,15 @@ export class Blockchain2Service {
       'Something bad happened; please try again later.');
   };
 
-  //트랜잭션 파라미터 가져오기
-  //거래 수수료 계산 사용
-  getTxnParam = async() => {
-    if(this.platform.is('capacitor')){
-      var options = {
-        url: this.base_path + '/v2/transactions/params',
-        headers: { 'Content-Type': 'application/json',
-        'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59' },
-        params: { },
-      };
-      return Http.request({ ...options, method: 'GET' }).then((response)=>{
-        return response.data;
-      });
-    }else{
-      return await this.http
-      .get(this.base_path + '/v2/transactions/params', this.httpOptions)
-      .pipe(
-        retry(2),
-        catchError(this.handleError)
-      ).toPromise();
-    }
-  };
+
   
   //Account 정보 가져오기. 보유한 자산, 계정잔고 등
   getAccountInfo = async(address) => {
     if(this.platform.is('capacitor')){
     var options = {
-      url: this.base_path + '/v2/accounts/' + address,
+      url: this.algod_path + '/v2/accounts/' + address,
       headers: { 'Content-Type': 'application/json',
-      'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59' },
+      'x-api-key': this.algod_token },
       params: { },
     };
     return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -94,7 +135,7 @@ export class Blockchain2Service {
     });
   }else{
     return await this.http
-    .get(this.base_path + '/v2/accounts/' + address, this.httpOptions)
+    .get(this.algod_path + '/v2/accounts/' + address, this.httpOptions)
     .pipe(
       retry(2),
       catchError(this.handleError)
@@ -102,12 +143,15 @@ export class Blockchain2Service {
   }
 }
 
-  getAssetInfo = async(assetId) => {
+    //트랜잭션 파라미터 가져오기
+  //거래 수수료 계산 사용
+  getTxnParam = async() => {
+    console.log(this.algod_path,"this.algod_path");
     if(this.platform.is('capacitor')){
       var options = {
-        url: this.base_path + '/v2/assets/' + assetId,
+        url: this.algod_path + '/v2/transactions/params',
         headers: { 'Content-Type': 'application/json',
-        'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59' },
+        'x-api-key': this.algod_token, },
         params: { },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -115,7 +159,29 @@ export class Blockchain2Service {
       });
     }else{
       return await this.http
-      .get(this.base_path + '/v2/assets/' + assetId, this.httpOptions)
+      .get(this.algod_path + '/v2/transactions/params', this.httpOptions)
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      ).toPromise();
+    }
+  };
+
+  getAssetInfo = async(assetId) => {
+    if(this.platform.is('capacitor')){
+      var options = {
+        url: this.algod_path + '/v2/assets/' + assetId,
+        headers: { 'Content-Type': 'application/json',
+        'x-api-key': this.algod_token,},
+        params: { },
+      };
+      return Http.request({ ...options, method: 'GET' }).then((response)=>{
+        return response.data;
+      });
+    }else{
+      console.log(this.httpOptions,"httpOptions");
+      return await this.http
+      .get(this.algod_path + '/v2/assets/' + assetId, this.httpOptions)
       .pipe(
         retry(2),
         catchError(this.handleError)
@@ -128,9 +194,9 @@ export class Blockchain2Service {
   getAddressAssetInfo = async(address,assetId) => {
     if(this.platform.is('capacitor')){
       var options = {
-        url: this.base_path + '/v2/accounts/' + address + '/assets/'+assetId,
+        url: this.algod_path + '/v2/accounts/' + address + '/assets/'+assetId,
         headers: { 'Content-Type': 'application/json',
-        'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59' },
+        'x-api-key': this.algod_token,},
         params: { },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -138,7 +204,7 @@ export class Blockchain2Service {
       });
     }else{
       return await this.http
-      .get(this.base_path + '/v2/accounts/' + address + '/assets/'+assetId, this.httpOptions)
+      .get(this.algod_path + '/v2/accounts/' + address + '/assets/'+assetId, this.httpOptions)
       .pipe(
         retry(2),
         catchError(this.handleError)
@@ -178,7 +244,7 @@ export class Blockchain2Service {
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
         headers: { 'Content-Type': 'application/json',
-        'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'},
+        'x-api-key':this.indexer_token, },
         params: { 'limit': '20','next':next_token},
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -189,9 +255,8 @@ export class Blockchain2Service {
       return await this.http
       .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
        {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-         'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
+        headers: new HttpHeaders({'Content-Type': 'application/json',
+        'x-api-key':this.indexer_token,
         }),
         params : {'limit': 20,'next':next_token}
       })
@@ -210,7 +275,7 @@ export class Blockchain2Service {
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
         headers: { 'Content-Type': 'application/json',
-        'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'},
+        'x-api-key':this.indexer_token,},
         params: { 'limit': '20','asset-id': asset_id.toString(),'next':next_token },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -220,9 +285,8 @@ export class Blockchain2Service {
       return await this.http
       .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
        {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-         'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
+        headers: new HttpHeaders({'Content-Type': 'application/json',
+        'x-api-key':this.indexer_token,
         }),
         params : {'limit': 20,'asset-id': asset_id,'next':next_token }
       })
@@ -241,7 +305,7 @@ export class Blockchain2Service {
       var options = {
         url: this.indexer_path + '/v2/accounts/' + address + '/transactions',
         headers: { 'Content-Type': 'application/json',
-        'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'},
+        'x-api-key':this.indexer_token,},
         params: { 'limit': '20','tx-type': txn_type,'next':next_token },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -251,10 +315,8 @@ export class Blockchain2Service {
       return await this.http
       .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
        {
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-         'x-api-key':'4LS0jVPkU61EBPpW2Ml3A2iaEcEfXK92aCDSzXXr'
-        }),
+        headers: new HttpHeaders({'Content-Type': 'application/json',
+        'x-api-key':this.indexer_token,}),
         params : {'limit': 20,'tx-type': txn_type,'next':next_token }
       })
       .pipe(

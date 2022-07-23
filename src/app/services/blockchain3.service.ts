@@ -11,6 +11,7 @@ import { FileOpener } from '@ionic-native/file-opener/ngx';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import { File } from '@ionic-native/file/ngx';
 import { StorageService } from './storage.service';
+import { Network } from '../const/network';
 
 //알고랜드 SDK 연결 및 데이터 획득용
 
@@ -21,27 +22,74 @@ import { StorageService } from './storage.service';
 export class Blockchain3Service {
    //http요청은 플랫폼에 별로 다른 http 요청 라이브러리를 사용한다.
   //특히 안드로이드에서 cors에 대응하기 위해 플랫폼 api를 사용하는 라이브러리를 쓴다.
-  base_path = "";
+  algod_path = "";
+  algod_token = "";
+  httpOptions = {};
   constructor(
     private file: File,
     private fileOpener: FileOpener,
     private http: HttpClient,
     public platform: Platform,
-    public storageService: StorageService) {    
-      if ( this.platform.is('capacitor') ) {
-        this.base_path = 'http://10.0.2.2:8080';
-      } else {
-        this.base_path = 'http://localhost:8080';
-      }
+    public storageService: StorageService) {   
+      //base path 설정을 위해 db에 저장된 network정보 가져오기
+      // this.getNetwork().then(response=>{
+      //   var responseToAny:any = response;
+      //   this.algod_path = responseToAny.algodIp;
+      //   this.algod_token = responseToAny.algodToken;
+      // });
+      
+      // if ( this.platform.is('capacitor') ) {
+      //   this.algod_path = 'http://10.0.2.2:8080';
+      // } else {
+      //   this.algod_path = 'http://localhost:8080';
+      // }
     }
 
+    setNetworkVariables(){
+      return new Promise(resolve=>{
+        this.getNetwork().then(response=>{
+          var responseToAny:any = response;
+          this.algod_path = responseToAny.algodIp;
+          this.algod_token = responseToAny.algodToken;
+          this.httpOptions = {
+            headers:{'Content-Type': 'application/json','x-api-key': this.algod_token},
+          };
+          return resolve(true);
+        });
+      });
+    }
+
+    getNetwork(){
+      return new Promise(resolve=>{
+        try{
+          this.storageService.get("network").then(response=>{
+            var responseJson = JSON.parse(response);
+            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+            resolve(network);
+          });
+        }catch{
+          //만약 최초 사용자여서 network 저장 기록이 없다면
+          //default로 생성해서 저장 후 다시 불러온다.
+          var networkObj = Network.NETWORK_TYPE_TO_IP_MAP.testNet;
+          var networkValue = {network:networkObj,};
+          var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
+          this.storageService.set("network",networkValueToString);
+          this.storageService.get("network").then(response=>{
+            var responseJson = JSON.parse(response);
+            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+            resolve(network);
+          });
+        }
+      })
+    }    
+
 // chrome extension 개발용, angular http요청용 옵션
-httpOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json',
-    'X-Algo-API-Token': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59'
-  })
-}
+// httpOptions = {
+//   headers: new HttpHeaders({
+//     'Content-Type': 'application/json',
+//     'x-api-key': this.algod_token,
+//   })
+// }
 
 //chrome extension 개발용, angular http요청  Handle API errors
 handleError(error: HttpErrorResponse) {
@@ -65,19 +113,19 @@ handleError(error: HttpErrorResponse) {
   //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생??
   getConnection = async()=> {
     return new Promise(async(resolve)=>{
-      var configJsonUnknown = await this.getConfigJson();
-      var configJson:any = configJsonUnknown;
-      var token = configJson.SmartContractParams.token;
-      var ip_address = "";
-      if(this.platform.is('capacitor')){
-        ip_address = configJson.SmartContractParams.ip_address_android;
-      }else{
-        ip_address = configJson.SmartContractParams.ip_address;
-      }
-      var port = configJson.SmartContractParams.port;
-      const algodToken = token;
-      const algodServer = ip_address;
-      const algodPort = Number(port);
+      // var configJsonUnknown = await this.getConfigJson();
+      // var configJson:any = configJsonUnknown;
+      // var token = configJson.SmartContractParams.token;
+      // var ip_address = "";
+      // if(this.platform.is('capacitor')){
+      //   ip_address = configJson.SmartContractParams.ip_address_android;
+      // }else{
+      //   ip_address = configJson.SmartContractParams.ip_address;
+      // }
+      // var port = configJson.SmartContractParams.port;
+      const algodToken = this.algod_token;
+      const algodServer = this.algod_path;
+      const algodPort = Number("");
       let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
       return resolve(algodClient);
     })

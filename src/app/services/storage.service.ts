@@ -100,6 +100,12 @@ export class StorageService {
             return resolve(result.currency);
         });
         }
+        else if(key=="network"){
+          chrome.storage.local.get([key], function(result) {
+            console.log("result.keyForUser",result)
+            return resolve(result.network);
+        });
+        }
     })
     return callbackPromise;
     }

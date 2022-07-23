@@ -16,3 +16,4 @@ SGD='SGD-Singapore Dollar'
 UAH='UAH-Ukrainian Hryvnia'
 USD='USD-United States Dollar'
 }
+

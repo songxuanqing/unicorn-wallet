@@ -12,6 +12,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { Clipboard } from '@ionic-native/clipboard/ngx';
+import { Blockchain2Service } from './services/blockchain2.service';
+import { Blockchain3Service } from './services/Blockchain3.service';
 
 @NgModule({
   declarations: [AppComponent],
@@ -21,7 +23,8 @@ import { Clipboard } from '@ionic-native/clipboard/ngx';
   // or after 30 seconds (whichever comes first).
   registrationStrategy: 'registerWhenStable:30000'
 }),],
-  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },FileOpener,File,HeaderService,Clipboard],
+  providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    FileOpener,File,HeaderService,Clipboard, Blockchain2Service,  Blockchain3Service],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
