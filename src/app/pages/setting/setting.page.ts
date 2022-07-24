@@ -20,8 +20,12 @@ export class SettingPage implements OnInit {
   constructor(private storageService: StorageService,) { }
 
   ngOnInit() {
+    //저장된 통화 가져오기 및 통화목록 생성
     this.getSelectedCurrency();
     this.createCurrencyList();
+    //저장된 네트워크 가져오기 및 네트워크 목록 생성
+    this.getSelectedNetwork();
+    this.createNetworkList();
   }
 
   //통화목록으로 가진 데이터(객체)를 가져와서 
@@ -74,7 +78,7 @@ export class SettingPage implements OnInit {
   getSelectedNetwork(){
     this.storageService.get("network").then(response=>{
       var responseJson = JSON.parse(response);
-      this.networkSelected = responseJson.network;
+      this.networkSelected = responseJson.network.networkName;
     });
   }
 
@@ -85,11 +89,11 @@ export class SettingPage implements OnInit {
   //선택한 Network명으로 ip주를 mapping하여서 가져온다.
   selectNetwork(networkName){
     var networkObj;
-    if(networkName == 'mainNet'){
+    if(networkName == 'MainNet'){
       networkObj = Network.NETWORK_TYPE_TO_IP_MAP.MainNet;
-    }else if(networkName == 'testNet'){
+    }else if(networkName == 'TestNet'){
       networkObj = Network.NETWORK_TYPE_TO_IP_MAP.TestNet;
-    }else if(networkName == 'betaNet'){
+    }else if(networkName == 'BetaNet'){
       networkObj = Network.NETWORK_TYPE_TO_IP_MAP.BetaNet;
     }
     var networkValue = {network:networkObj,};

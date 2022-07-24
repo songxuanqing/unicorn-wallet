@@ -67,16 +67,17 @@ export class ConfirmPage implements OnInit {
 
 
   async confirm(){
-    //토큰아이디가 있을 경우 asset 보내는 txn을 아닐 경우 일반 txn요청
+    var isAssetTransfer:boolean; //나중에 해당 변수를 페이지 시작시 정의하는 것으로 변경 필요. service의 sendTxn도 하나로 통일
     if(this.token_id!=null){
-      this.blockchainSDKService.sendAssetTxn(this.sender,this.receiver,this.token_id,this.sent_amount).then(async(response)=>{
-        console.log(response);
-      });
+      isAssetTransfer = true;
     }else{
-      this.blockchainSDKService.sendTxn(this.sender,this.receiver,this.sent_amount).then(async(response)=>{
-        console.log(response);
-      });
+      isAssetTransfer = false;
     }
+    //니모닉 가져와서 전달
+    var mnemonic = await this.getMnemonic(this.sender);
+    this.blockchainSDKService.sendTxn(this.sender,mnemonic,this.receiver,this.token_id,this.sent_amount,isAssetTransfer).then(async(response)=>{
+      console.log(response);
+    });
     //최근 보낸 주소 저장.
     this.setRecentlySentAddresses(this.receiver);
     //만약 외부에서 요청한 것일 경우 sendTxn 데이터가 저장되어 있을 것이므로
@@ -153,19 +154,21 @@ export class ConfirmPage implements OnInit {
   }
 
 
-  getFee(){
+  async getFee(){
     //토큰(에셋) 전송인지 아니면 코인 전송인지에 따라 서비스 내 txnToByte의 내부
     //로직이 달라지므로, token_id가 없다면 토큰 전송을하지 않는 것이므로, 변수로 false를 반환.
-    var isAssetTransfer:boolean;
+    var isAssetTransfer:boolean; //나중에 해당 변수를 페이지 시작시 정의하는 것으로 변경 필요. service의 sendTxn도 하나로 통일
     if(this.token_id!=null){
       isAssetTransfer = true;
     }else{
       isAssetTransfer = false;
     }
-    this.blockchainSDKService.txnToByte(this.sender,this.receiver,this.token_id,this.sent_amount,isAssetTransfer).then(async(response)=>{
+    //니모닉 가져와서 전달
+    var mnemonic = await this.getMnemonic(this.sender);
+    this.blockchainSDKService.txnToByte(this.sender,mnemonic,this.receiver,this.token_id,this.sent_amount,isAssetTransfer).then(async(response)=>{
       var len = +response;
+      console.log("lent",len);
       this.apiService.getTxnParam().then(async(response)=>{
-        console.log(response);
         var res:any = response;
         var fee = res.fee;
         var min_fee = response['min-fee'];
@@ -196,10 +199,22 @@ export class ConfirmPage implements OnInit {
         this.currentBalance = accountData.amount;
         return this.currentBalance;
       });
-    }
-    
-  }
+    };
+  };
 
-  
+  getMnemonic(sender){
+    return new Promise (resolve=>{
+      this.storageService.getDecryption("accounts",null).then(async(response)=>{
+        var accounts:any = response;  
+        var mnemonic = "";
+        accounts.forEach(item=>{
+          if(sender == item.addr){
+            mnemonic = item.mnemonic;
+          };
+        });
+        return resolve(mnemonic);
+      });
+    });
+  };
 
 }

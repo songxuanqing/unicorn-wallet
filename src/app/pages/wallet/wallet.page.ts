@@ -2,6 +2,7 @@ import { Component, OnInit,  } from '@angular/core';
 import { Account } from '../../models/account';
 import { Token } from '../../models/token';
 import { Blockchain2Service } from '../../services/blockchain2.service';
+import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { HeaderService } from '../../services/header.service';
@@ -36,6 +37,7 @@ export class WalletPage implements OnInit {
   constructor(
     private header:HeaderService,
     public apiService: Blockchain2Service,
+    public blockchainSDKService: Blockchain3Service,
     private router:Router,
     private route:ActivatedRoute,
     public toastController: ToastController,
@@ -108,9 +110,10 @@ export class WalletPage implements OnInit {
   async getAccountInfo(account_address) {
     //rest api 서비스의 변수들 먼저 생성.
     await this.apiService.setNetworkVariables();
+    await this.blockchainSDKService.setNetworkVariables();
     this.apiService.getAccountInfo(account_address).then(async (response) => {
       var accountData:any = response;
-      console.log(accountData.assets);
+      accountData = accountData.account;
       this.account.address = accountData.address;
       this.account.amount = accountData.amount;
       for(var i=0; i<accountData.assets.length; i++){
@@ -164,6 +167,7 @@ export class WalletPage implements OnInit {
     return this.apiService.getAssetInfo(asset_id).then((response) =>
       {
         var tokenData: any = response;
+        tokenData = tokenData.asset;
         tk.name = tokenData.params.name;
         tk.url = tokenData.params.url;
         tk['unit-name'] = tokenData.params['unit-name'];

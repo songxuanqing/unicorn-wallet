@@ -12,6 +12,7 @@ import { Filesystem, Directory } from '@capacitor/filesystem';
 import { File } from '@ionic-native/file/ngx';
 import { StorageService } from './storage.service';
 import { Network } from '../const/network';
+import {Buffer} from 'buffer';
 
 //알고랜드 SDK 연결 및 데이터 획득용
 
@@ -24,6 +25,8 @@ export class Blockchain3Service {
   //특히 안드로이드에서 cors에 대응하기 위해 플랫폼 api를 사용하는 라이브러리를 쓴다.
   algod_path = "";
   algod_token = "";
+  indexer_path = "";
+  indexer_token = "";
   httpOptions = {};
   constructor(
     private file: File,
@@ -32,17 +35,6 @@ export class Blockchain3Service {
     public platform: Platform,
     public storageService: StorageService) {   
       //base path 설정을 위해 db에 저장된 network정보 가져오기
-      // this.getNetwork().then(response=>{
-      //   var responseToAny:any = response;
-      //   this.algod_path = responseToAny.algodIp;
-      //   this.algod_token = responseToAny.algodToken;
-      // });
-      
-      // if ( this.platform.is('capacitor') ) {
-      //   this.algod_path = 'http://10.0.2.2:8080';
-      // } else {
-      //   this.algod_path = 'http://localhost:8080';
-      // }
     }
 
     setNetworkVariables(){
@@ -50,7 +42,9 @@ export class Blockchain3Service {
         this.getNetwork().then(response=>{
           var responseToAny:any = response;
           this.algod_path = responseToAny.algodIp;
+          this.indexer_path = responseToAny.indexerIp;
           this.algod_token = responseToAny.algodToken;
+          this.indexer_token = responseToAny.indexerToken;
           this.httpOptions = {
             headers:{'Content-Type': 'application/json','x-api-key': this.algod_token},
           };
@@ -61,49 +55,38 @@ export class Blockchain3Service {
 
     getNetwork(){
       return new Promise(resolve=>{
-        try{
-          this.storageService.get("network").then(response=>{
+          this.storageService.get("network").then(async response=>{
             var responseJson = JSON.parse(response);
-            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-            resolve(network);
+            if(Object.keys(responseJson).length > 0){
+              var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+              return resolve(network);
+            }else{
+              //만약 최초 사용자여서 network 저장 기록이 없다면
+              //default로 생성해서 저장 후 다시 불러온다.
+              var networkObj = Network.NETWORK_TYPE_TO_IP_MAP.TestNet;
+              var networkValue = {network:networkObj,};
+              var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
+              await this.storageService.set("network",networkValueToString);
+              this.storageService.get("network").then(response=>{
+              var responseJson = JSON.parse(response);
+              var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+              console.log("getNetwork",network);
+              return resolve(network);
+            });
+            };
           });
-        }catch{
-          //만약 최초 사용자여서 network 저장 기록이 없다면
-          //default로 생성해서 저장 후 다시 불러온다.
-          var networkObj = Network.NETWORK_TYPE_TO_IP_MAP.testNet;
-          var networkValue = {network:networkObj,};
-          var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
-          this.storageService.set("network",networkValueToString);
-          this.storageService.get("network").then(response=>{
-            var responseJson = JSON.parse(response);
-            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-            resolve(network);
-          });
-        }
-      })
-    }    
-
-// chrome extension 개발용, angular http요청용 옵션
-// httpOptions = {
-//   headers: new HttpHeaders({
-//     'Content-Type': 'application/json',
-//     'x-api-key': this.algod_token,
-//   })
-// }
+      });
+    } 
 
 //chrome extension 개발용, angular http요청  Handle API errors
 handleError(error: HttpErrorResponse) {
   if (error.error instanceof ErrorEvent) {
-    // A client-side or network error occurred. Handle it accordingly.
-    console.error('An error occurred:', error.error.message);
+    console.error('An error occurred: ', error.error.message);
   } else {
-    // The backend returned an unsuccessful response code.
-    // The response body may contain clues as to what went wrong,
     console.error(
-      `Backend returned code ${error.status}, ` +
-      `body was: ${error.error}`);
+      'Backend returned code %o',error,
+      `body was: ${error.message}`);
   }
-  // return an observable with a user-facing error message
   return throwError(
     'Something bad happened; please try again later.');
 };
@@ -113,20 +96,11 @@ handleError(error: HttpErrorResponse) {
   //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생??
   getConnection = async()=> {
     return new Promise(async(resolve)=>{
-      // var configJsonUnknown = await this.getConfigJson();
-      // var configJson:any = configJsonUnknown;
-      // var token = configJson.SmartContractParams.token;
-      // var ip_address = "";
-      // if(this.platform.is('capacitor')){
-      //   ip_address = configJson.SmartContractParams.ip_address_android;
-      // }else{
-      //   ip_address = configJson.SmartContractParams.ip_address;
-      // }
-      // var port = configJson.SmartContractParams.port;
-      const algodToken = this.algod_token;
-      const algodServer = this.algod_path;
-      const algodPort = Number("");
-      let algodClient = new algosdk.Algodv2(algodToken, algodServer, algodPort);
+      const newServer = this.algod_path;
+      const port = '';
+      const token = { 'X-API-key': this.algod_token };
+      var algodClient = new algosdk.Algodv2(token, newServer, port);
+      console.log("algodClient",algodClient);
       return resolve(algodClient);
     })
   }
@@ -143,28 +117,18 @@ handleError(error: HttpErrorResponse) {
 
   //거래정보를 byte로 변환. 거래 수수료 계산 목적
   //수수료는 [최소 수수료 1000 마이크로 알고] 와 [거래정보 byte*byte당 수수료] 중 더 큰것으로 계산
-  txnToByte = async(from_mnemonic:string,to_address:string,token_id:number,sent_amount:number,isAssetTransfer:boolean) =>  {
+  txnToByte = async(from_address,mnemonic,to_address,token_id:number,sent_amount:number,isAssetTransfer:boolean) =>  {
     return new Promise(async(resolve)=>{
-      var configJsonUnknown = await this.getConfigJson();
-      var configJson:any = configJsonUnknown;
-      //보내는 사람 개인키 가져와서 서명하기
-      var devMnemonic = configJson.SmartContractParams.dev_mnemonic;
       type Account = {
         [key:string] : any
       }
-      var account:Account = await this.getAccount(devMnemonic);
-      var devPK = account.sk; //config파일에 비밀키가 있는데 니모닉을 통해서 가져오는 이유는, flask로 넘격던 다른 함수와 달리 
-      //이 경우에는 backend에서 바로 서명해야 하기 때문에 uint로 인코딩된 값을 그대로 가져와서 서명으로 추가함.
-      var sender = account.addr;
+      var account:Account = await this.getAccount(mnemonic);
+      var sk = account.sk; 
+      var sender = from_address;
       var revocationTarget = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
       var closeRemainderTo = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
-      var algodClientUnknown = await this.getConnection();
-      var algodClient:any = algodClientUnknown;
-      type Params = {
-        [key:string]:any;
-      }
-      var paramsUnknown = await algodClient.getTransactionParams().do();
-      var params:any = paramsUnknown;
+      var algodClient:any = await this.getConnection();
+      var params:any = await algodClient.getTransactionParams().do();
       params.fee = algosdk.ALGORAND_MIN_TX_FEE;
       params.flatFee =  true;
       var receiver = to_address;
@@ -192,111 +156,80 @@ handleError(error: HttpErrorResponse) {
           suggestedParams: params
         });
       }
-      
-      var rawSignedTxn = txn.signTxn(devPK);
+      var rawSignedTxn = txn.signTxn(sk);
       var txId = txn.txID().toString();
-      console.log("Signed transaction with txID: %s", txId);
       var pay_txn_bytes = algosdk.encodeObj(txn.get_obj_for_encoding());
       return resolve(pay_txn_bytes.length);
-    })
-  }
+    });
+  };
+
+  //트랜잭션 파라미터 가져오기
+  //거래 수수료 계산 사용
+  getTxnParam = async() => {
+    console.log(this.algod_path,"this.algod_path");
+    if(this.platform.is('capacitor')){
+      var options = {
+        url: this.algod_path + '/v2/transactions/params',
+        headers: { 'Content-Type': 'application/json',
+        'x-api-key': this.algod_token, },
+        params: { },
+      };
+      return Http.request({ ...options, method: 'GET' }).then((response)=>{
+        return response.data;
+      });
+    }else{
+      return await this.http
+      .get(this.algod_path + '/v2/transactions/params', this.httpOptions)
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      ).toPromise();
+    }
+  };
 
   //암호화폐 거래(송금)
-  sendTxn = async (from_mnemonic,to_address,sent_amount) => {
+  sendTxn = async (from_address,mnemonic,to_address,token_id,sent_amount,isAssetTransfer:boolean) => {
     return new Promise(async(resolve)=>{
-      var configJsonUnknown = await this.getConfigJson();
-      var configJson:any = configJsonUnknown;
-      //보내는 사람 개인키 가져와서 서명하기
-      var devMnemonic = configJson.SmartContractParams.dev_mnemonic;
-      type Account = {
-        [key:string] : any
+      var algodClient:any = await this.getConnection();
+      var params = await algodClient.getTransactionParams().do();
+      console.log(params);
+      var amount = Math.floor(Math.random() * 1000);
+      var recoveredAccount = algosdk.mnemonicToSecretKey(mnemonic);
+      var txn;
+      if(isAssetTransfer){
+        txn = {
+          "from": from_address,
+          "to": to_address,
+          "fee": algosdk.ALGORAND_MIN_TX_FEE,
+          "amount": amount,
+          "firstRound": params.firstRound,
+          "lastRound": params.lastRound,
+          "genesisID": params.genesisID,
+          "genesisHash": params.genesisHash,
+          "note": new Uint8Array(0),
+        };
+      }else{
+        txn = {
+          "from": from_address,
+          "to": to_address,
+          "fee": algosdk.ALGORAND_MIN_TX_FEE,
+          "amount": amount,
+          "closeRemainderTo":undefined, 
+          "revocationTarget":undefined,
+          "tokenID":token_id, 
+          "firstRound": params.firstRound,
+          "lastRound": params.lastRound,
+          "genesisID": params.genesisID,
+          "genesisHash": params.genesisHash,
+          "note": new Uint8Array(0),
+        };
       }
-      var account:Account = await this.getAccount(devMnemonic);
-      var devPK = account.sk; //config파일에 비밀키가 있는데 니모닉을 통해서 가져오는 이유는, flask로 넘격던 다른 함수와 달리 
-      //이 경우에는 backend에서 바로 서명해야 하기 때문에 uint로 인코딩된 값을 그대로 가져와서 서명으로 추가함.
-      var sender = account.addr;
-      var revocationTarget = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
-      var closeRemainderTo = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
-      var algodClientUnknown = await this.getConnection();
-      var algodClient:any = algodClientUnknown;
-      var paramsUnknown = await algodClient.getTransactionParams().do();
-      var params:any = paramsUnknown;
-      params.fee = algosdk.ALGORAND_MIN_TX_FEE;
-      params.flatFee =  true;
-      var receiver = to_address;
-      var enc = new TextEncoder();
-      var note = enc.encode("Hello World");
-      var amount = sent_amount;
-      var txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-        from: sender, 
-        to: receiver, 
-        amount: amount, 
-        note: note, 
-        suggestedParams: params
-      });
-      var rawSignedTxn = txn.signTxn(devPK);
-      var txId = txn.txID().toString();
-      var xtx = await algodClient.sendRawTransaction(rawSignedTxn).do();
-      var confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
-      var string = new TextDecoder().decode(confirmedTxn.txn.txn.note);
-      var accountInfo = await algodClient.accountInformation(sender).do();
-      var accountInfo = await algodClient.accountInformation(receiver).do();
-      var result = txId;
-      return resolve(result);
+      let signedTxn = algosdk.signTransaction(txn, recoveredAccount.sk);
+      let sendTx = await algodClient.sendRawTransaction(signedTxn.blob).do();
+      console.log("Transaction : " + sendTx.txId);
   })
 }
 
-  //자산거래(자산 전송)
-  sendAssetTxn = async (from_mnemonic,to_address,token_id,sent_amount) => {
-    return new Promise(async(resolve)=>{
-      var configJsonUnknown = await this.getConfigJson();
-      var configJson:any = configJsonUnknown;
-      //보내는 사람 개인키 가져와서 서명하기
-      var devMnemonic = configJson.SmartContractParams.dev_mnemonic;
-      type Account = {
-        [key:string] : any
-      }
-      var account:Account = await this.getAccount(devMnemonic);
-      var devPK = account.sk; //config파일에 비밀키가 있는데 니모닉을 통해서 가져오는 이유는, flask로 넘격던 다른 함수와 달리 
-      //이 경우에는 backend에서 바로 서명해야 하기 때문에 uint로 인코딩된 값을 그대로 가져와서 서명으로 추가함.
-      var sender = account.addr;
-      var revocationTarget = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
-      var closeRemainderTo = undefined; //undefinde로 되어 있어야 이 변수에 실주소가 있는지 없는지 검증하지 않는다.
-      var algodClientUnknown = await this.getConnection();
-      var algodClient:any = algodClientUnknown;
-      // type Params = {
-      //   [key:string]:any;
-      // }
-      var paramsUnknown = await algodClient.getTransactionParams().do();
-      var params:any = paramsUnknown;
-      params.fee = algosdk.ALGORAND_MIN_TX_FEE;
-      params.flatFee =  true;
-      var receiver = to_address;
-      var enc = new TextEncoder();
-      var note = enc.encode("Hello World");
-      var amount = sent_amount;
-      var tokenID = token_id;
-      console.log(tokenID);
-      var xtxn = algosdk.makeAssetTransferTxnWithSuggestedParams(
-          sender, 
-          receiver,
-          closeRemainderTo, 
-          revocationTarget,
-          amount,  
-          note, 
-          tokenID, 
-          params);
-    var rawSignedTxn = xtxn.signTxn(devPK);
-    var txId = xtxn.txID().toString();
-    var xtx = await algodClient.sendRawTransaction(rawSignedTxn).do();
-    var confirmedTxn = await algosdk.waitForConfirmation(algodClient, txId, 4);
-    var string = new TextDecoder().decode(confirmedTxn.txn.txn.note);
-    var accountInfo = await algodClient.accountInformation(sender).do();
-    var accountInfo = await algodClient.accountInformation(receiver).do();
-    var result = txId;
-    return resolve(result);
-  })
-}
 
 //test 목적. 개발자 계정 정보 가져오기
 getDevAccount = async () => {

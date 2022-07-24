@@ -66,7 +66,7 @@ export class LoginPage implements OnInit {
 
   getAccountListFromStorage = (responseToAny): Promise<AccountStored> =>{
     return new Promise<AccountStored>((resolve, reject)=>{
-      var getAccount = responseToAny[0];
+      var getAccount = responseToAny[0]; //반환된 account 목록 중 첫번째 account 가져온다. (wallet으로 넘기는 account)
       var account = new AccountStored();
       account.addr = getAccount.addr;
       account.name = getAccount.name;

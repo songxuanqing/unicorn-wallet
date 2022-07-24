@@ -27,23 +27,6 @@ export class Blockchain2Service {
     private http: HttpClient,
     public platform: Platform,
     private storageService:StorageService,) {
-      //base path 설정을 위해 db에 저장된 network정보 가져오기
-      //var responseToAny:any = await this.getNetwork();
-      // this.getNetwork().then(response=>{
-      //   var responseToAny:any = response;
-      //   this.algod_path = responseToAny.algodIp;
-      //   this.indexer_path = responseToAny.indexer_path;
-      //   this.algod_token = responseToAny.algodToken;
-      //   this.indexer_token = responseToAny.indexer_token;
-
-      // // if (this.platform.is('capacitor')) {
-      // //   this.algod_path = "http://10.0.2.2:8080";
-      // //   this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
-      // // } else {
-      // //   this.algod_path = 'http://localhost:8080';
-      // //   this.indexer_path = "https://testnet-algorand.api.purestake.io/idx2";
-      // // }
-      // });
     }
 
   setNetworkVariables(){
@@ -51,9 +34,9 @@ export class Blockchain2Service {
       this.getNetwork().then(response=>{
         var responseToAny:any = response;
         this.algod_path = responseToAny.algodIp;
-        this.indexer_path = responseToAny.indexer_path;
+        this.indexer_path = responseToAny.indexerIp;
         this.algod_token = responseToAny.algodToken;
-        this.indexer_token = responseToAny.indexer_token;
+        this.indexer_token = responseToAny.indexerToken;
         console.log(this.algod_token,"this.algod_token");
         this.httpOptions = {
         headers:{'Content-Type': 'application/json','x-api-key': this.algod_token},
@@ -83,38 +66,21 @@ export class Blockchain2Service {
             console.log("getNetwork",network);
             return resolve(network);
           });
-          }
+          };
         });
-    })
+    });
   }  
-
-  // chrome extension 개발용 angular Http요청 위한 옵션
-  // httpOptions = {
-  //   headers: new HttpHeaders({'Content-Type': 'application/json','x-api-key': this.algod_token}),
-  //   // headers = headers.append('Content-Type', 'application/json');
-  //   // headers = headers.append('x-api-key', this.algod_token);
-  //   // headers: new HttpHeaders({
-  //   //   'Content-Type': 'application/json',
-  //   //   'x-api-key': `${this.algod_token}`
-  //   //   //'x-api-key': '158a0082b552fe50d446f53329c972985de0c4ae43d5b2fd1bebc443b077cf59'
-  //   // })
-  // }
-
 
 
   //chrome extension 개발용 angular Http요청 위한 api error 핸들링
   handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error.message);
     } else {
-      // The backend returned an unsuccessful response code.
-      // The response body may contain clues as to what went wrong,
       console.error(
         `Backend returned code ${error.status}, ` +
         `body was: ${error.error}`);
     }
-    // return an observable with a user-facing error message
     return throwError(
       'Something bad happened; please try again later.');
   };
@@ -125,9 +91,9 @@ export class Blockchain2Service {
   getAccountInfo = async(address) => {
     if(this.platform.is('capacitor')){
     var options = {
-      url: this.algod_path + '/v2/accounts/' + address,
+      url: this.indexer_path + '/v2/accounts/' + address,
       headers: { 'Content-Type': 'application/json',
-      'x-api-key': this.algod_token },
+      'x-api-key': this.indexer_token },
       params: { },
     };
     return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -135,7 +101,7 @@ export class Blockchain2Service {
     });
   }else{
     return await this.http
-    .get(this.algod_path + '/v2/accounts/' + address, this.httpOptions)
+    .get(this.indexer_path + '/v2/accounts/' + address, this.httpOptions)
     .pipe(
       retry(2),
       catchError(this.handleError)
@@ -143,7 +109,7 @@ export class Blockchain2Service {
   }
 }
 
-    //트랜잭션 파라미터 가져오기
+  //트랜잭션 파라미터 가져오기
   //거래 수수료 계산 사용
   getTxnParam = async() => {
     console.log(this.algod_path,"this.algod_path");
@@ -170,9 +136,9 @@ export class Blockchain2Service {
   getAssetInfo = async(assetId) => {
     if(this.platform.is('capacitor')){
       var options = {
-        url: this.algod_path + '/v2/assets/' + assetId,
+        url: this.indexer_path + '/v2/assets/' + assetId,
         headers: { 'Content-Type': 'application/json',
-        'x-api-key': this.algod_token,},
+        'x-api-key': this.indexer_token,},
         params: { },
       };
       return Http.request({ ...options, method: 'GET' }).then((response)=>{
@@ -181,7 +147,7 @@ export class Blockchain2Service {
     }else{
       console.log(this.httpOptions,"httpOptions");
       return await this.http
-      .get(this.algod_path + '/v2/assets/' + assetId, this.httpOptions)
+      .get(this.indexer_path + '/v2/assets/' + assetId, this.httpOptions)
       .pipe(
         retry(2),
         catchError(this.handleError)
@@ -252,12 +218,12 @@ export class Blockchain2Service {
         return response.data;
       });
     }else{
+      console.log(this.indexer_path + '/v2/accounts/' + address + '/transactions');
       return await this.http
       .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
        {
-        headers: new HttpHeaders({'Content-Type': 'application/json',
-        'x-api-key':this.indexer_token,
-        }),
+        headers: {'Content-Type': 'application/json',
+        'x-api-key':this.indexer_token,},
         params : {'limit': 20,'next':next_token}
       })
       .pipe(
@@ -282,6 +248,7 @@ export class Blockchain2Service {
         return response.data;
       });
     }else{
+      console.log(this.indexer_path + '/v2/accounts/' + address + '/transactions');
       return await this.http
       .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
        {
@@ -312,6 +279,7 @@ export class Blockchain2Service {
         return response.data;
       });
     }else{
+      console.log(this.indexer_path + '/v2/accounts/' + address + '/transactions');
       return await this.http
       .get(this.indexer_path + '/v2/accounts/' + address + '/transactions',
        {

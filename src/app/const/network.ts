@@ -23,18 +23,21 @@ export class Network {
 
     public static NETWORK_TYPE_TO_IP_MAP = {
         [Network.mainNet]: {
+          networkName: Network.mainNet,
           algodIp: this.mainNetAlgodIp,
           algodToken: this.mainNetAlgodToken,
           indexerIp: this.mainNetIndexerIp,
           indexerToken: this.mainNetIndexerToken,
         },
         [Network.testNet]: {
+            networkName: Network.testNet,
             algodIp: this.testNetAlgodIp,
             algodToken: this.testNetAlgodToken,
             indexerIp: this.testNetIndexerIp,
             indexerToken: this.testNetIndexerToken,
         },
         [Network.betaNet]: {
+            networkName: Network.betaNet,
             algodIp: this.betaNetAlgodIp,
             algodToken: this.betaNetAlgodToken,
             indexerIp: this.betaNetIndexerIp,

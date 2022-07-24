@@ -236,19 +236,19 @@ export class HistoryPage implements OnInit {
     }
   }
 
-  getTransactionHistory(address,next_token){
+  async getTransactionHistory(address,next_token){
     this.apiService.getTransactionHistory(address,next_token).then((response) => {
       this.parseAndPushTransactionHistory(response);
     });
   }
 
-  getCoinTransactionHistory(address,txn_type,next_token){
+  async getCoinTransactionHistory(address,txn_type,next_token){
     this.apiService.getCoinTransactionHistory(address,txn_type,next_token).then((response) => {
       this.parseAndPushTransactionHistory(response);
     });
   }
 
-  getSelectedTokenTransactionHistory(address,asset_id,next_token){
+  async getSelectedTokenTransactionHistory(address,asset_id,next_token){
     this.apiService.getSelectedTokenTransactionHistory(address,asset_id,next_token).then((response) => {
       this.parseAndPushTransactionHistory(response);
     });

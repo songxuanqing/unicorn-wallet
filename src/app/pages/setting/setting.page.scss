@@ -2,6 +2,15 @@
     font-size: 13px;
 }
 
+ion-select input::placeholder{
+  color:black
+}
+
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color:black;
+  opacity: 1; /* Firefox */
+}
+
 ion-button[color=dark]{
     text-transform: initial;
 }
@@ -54,19 +63,6 @@ ion-header {
               font-size: 1.2rem;
             }
           }
-        //   ion-button {
-        //     height: 3em !important;
-        //     transform: translateY(10%);
-        //     text-transform: none;
-        //     ion-text {
-        //       font-size: 0.7rem;
-        //       font-weight: bold;
-        //       text-shadow: 1px 1px 1px var(--ion-color-medium);
-        //     }
-        //     ion-icon {
-        //       font-size: 1rem;
-        //     }
-        //   }
           ion-card {
             box-shadow: -1px 11px 13px -6px rgb(87, 86, 86);
             border-radius: 10px !important;
