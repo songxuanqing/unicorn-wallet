@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { StorageService } from '../../services/storage.service';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { Currency } from '../../const/currency';
 import { Network } from '../../const/network';
+import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-setting',
@@ -17,7 +19,11 @@ export class SettingPage implements OnInit {
 
   //지갑 page는 db에 저장된 설정 정보를 읽어온다. (통화, 언어)
   
-  constructor(private storageService: StorageService,) { }
+  constructor(private storageService: StorageService,
+    private router:Router,
+    private route:ActivatedRoute,
+    private header:HeaderService,
+    ) { }
 
   ngOnInit() {
     //저장된 통화 가져오기 및 통화목록 생성
@@ -101,7 +107,11 @@ export class SettingPage implements OnInit {
     this.storageService.set("network",networkValueToString);
   }
 
-
-
+  //비밀번호 재설정 페이지 이동
+  goToChangePasswordPage(){
+    const navigationExtras: NavigationExtras = {
+    };
+    this.router.navigateByUrl('/change-pw',navigationExtras);
+  }
 
 }

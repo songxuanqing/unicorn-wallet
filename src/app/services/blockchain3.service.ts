@@ -91,7 +91,6 @@ handleError(error: HttpErrorResponse) {
     'Something bad happened; please try again later.');
 };
 
-
   //설정한 ip, port, 토큰으로 접속 client 객체 반환
   //실제 배포하면 algod서버가 원격에 있는데, 이 경우 cors error 발생??
   getConnection = async()=> {

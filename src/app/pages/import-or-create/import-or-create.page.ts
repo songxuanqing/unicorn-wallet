@@ -104,6 +104,7 @@ export class ImportOrCreatePage implements OnInit {
       if (ev.detail.role === 'confirm') {
         var name = "Account"+(this.accountList.length + 1);
         var newAccount:AccountStored = new AccountStored();
+        newAccount.isMain = true;
         newAccount.name = name;
         newAccount.addr = ev.detail.data[0];
         newAccount.mnemonic = ev.detail.data[1];
@@ -129,6 +130,7 @@ export class ImportOrCreatePage implements OnInit {
         var name = "Account"+(this.accountList.length + 1);
         var responseArr = responseToString.split(":");
         var newAccount:AccountStored = new AccountStored();
+        newAccount.isMain = true;
         newAccount.name = name;
         newAccount.addr = responseArr[0];
         newAccount.mnemonic = responseArr[1];

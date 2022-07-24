@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { ApiService } from '../../services/blockchain.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 
@@ -20,6 +21,7 @@ export class TokenPage implements OnInit {
     private router:Router,
     private route:ActivatedRoute,
     private apiService: ApiService,
+    private header:HeaderService,
     ) {
 
    }

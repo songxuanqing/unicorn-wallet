@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild  } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { StorageService } from '../../services/storage.service';
@@ -7,6 +8,7 @@ import { AccountWithAmount } from '../../models/account-with-amount';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { IonModal,ToastController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-account',
@@ -37,7 +39,10 @@ export class AccountPage implements OnInit {
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service,
     private storageService: StorageService,
-    public toastController: ToastController,) { 
+    public toastController: ToastController,
+    private header: HeaderService,
+    private alertController: AlertController,
+    ) { 
 
     }
 
@@ -56,6 +61,7 @@ export class AccountPage implements OnInit {
       var name = "Account"+(this.accountList.length + 1);
       var responseArr = responseToString.split(":");
       var newAccount:AccountStored = new AccountStored();
+      newAccount.isMain = false;
       newAccount.name = name;
       newAccount.addr = responseArr[0];
       newAccount.mnemonic = responseArr[1];
@@ -90,6 +96,7 @@ export class AccountPage implements OnInit {
          [key:string]: any
        }
        var temp:Temp = responseToAny[i];
+       accountStored.isMain = temp.isMain;
        accountStored.name = temp.name;
        accountStored.addr = temp.addr;
        accountStored.mnemonic = temp.mnemonic;
@@ -118,6 +125,7 @@ export class AccountPage implements OnInit {
     for (var item of this.accountListWithAmount){
       var response = await this.apiService.getAccountInfo(item.account.addr)
       var accountData:any = response;
+      accountData = accountData.account;
       var accountAmount:number = accountData.amount;
       item.amount = accountAmount;
     }
@@ -166,6 +174,7 @@ export class AccountPage implements OnInit {
     if (ev.detail.role === 'confirm') {
       var name = "Account"+(this.accountList.length + 1);
       var newAccount:AccountStored = new AccountStored();
+      newAccount.isMain = false;
       newAccount.name = name;
       newAccount.addr = ev.detail.data[0];
       newAccount.mnemonic = ev.detail.data[1];
@@ -183,15 +192,65 @@ export class AccountPage implements OnInit {
 
   changeAccount(account){
     //mainAccount를 바꾼다.
-  }
-  changeAccountName(accountName){
+    var newAccount:AccountStored = new AccountStored();
+    newAccount.isMain = true;
+    newAccount.name = account.name;
+    newAccount.addr = account.addr;
+    var index = this.accountList.indexOf(account);
+    if (index !== -1) {
+      items[index] = newAccount;
+    }
+    this.storeAccount();
+    //노티피케이션 띄운다. (successfully changed)
 
+  }
+
+  changeAccountName(newAccountName,account){
+    var newAccount:AccountStored = new AccountStored();
+    newAccount.isMain = account.isMain;
+    newAccount.name = newAccountName;
+    newAccount.addr = account.addr;
+    var index = this.accountList.indexOf(account);
+    if (index !== -1) {
+      items[index] = newAccount;
+    }
+    this.storeAccount();
+    //html업데이트되는지 확인
   }
 
   goToExportPage(){
     const navigationExtras: NavigationExtras = {
     };
     this.router.navigateByUrl('/export-list',navigationExtras);
+  }
+
+  async presentNameInputAlert(account) {
+    const alert = await this.alertController.create({
+      header: 'Please enter new account name',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          handler: () => {  }
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+          handler: (accountName) => { 
+            console.log("input",accountName);
+            this.changeAccountName(accountName,account); }
+        }
+      ],
+      inputs: [
+        {
+          name:'accountName',
+          placeholder: ''
+        },
+      ]
+    });
+    await alert.present();
+    const { role } = await alert.onDidDismiss();
+    
   }
 
 }

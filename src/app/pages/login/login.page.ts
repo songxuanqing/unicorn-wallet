@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { AccountStored } from '../../models/account-stored';
@@ -13,7 +14,9 @@ export class LoginPage implements OnInit {
   account:AccountStored;
   constructor(private router:Router,
     private route:ActivatedRoute,
-    private storageService: StorageService,) { }
+    private storageService: StorageService,
+    private header:HeaderService,
+    ) { }
 
   ngOnInit() {
   }
@@ -68,6 +71,7 @@ export class LoginPage implements OnInit {
     return new Promise<AccountStored>((resolve, reject)=>{
       var getAccount = responseToAny[0]; //반환된 account 목록 중 첫번째 account 가져온다. (wallet으로 넘기는 account)
       var account = new AccountStored();
+      account.isMain = getAccount.isMain;
       account.addr = getAccount.addr;
       account.name = getAccount.name;
       return resolve(account);

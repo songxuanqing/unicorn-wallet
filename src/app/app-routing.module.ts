@@ -63,6 +63,10 @@ const routes: Routes = [
     path: 'setting',
     loadChildren: () => import('./pages/setting/setting.module').then( m => m.SettingPageModule)
   },
+  {
+    path: 'change-pw',
+    loadChildren: () => import('./pages/change-pw/change-pw.module').then( m => m.ChangePWPageModule)
+  },
 ];
 
 @NgModule({

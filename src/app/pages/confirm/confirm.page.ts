@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
@@ -28,6 +29,7 @@ export class ConfirmPage implements OnInit {
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service,
     private storageService: StorageService,
+    private header:HeaderService,
     ) {
       
    }
@@ -196,6 +198,7 @@ export class ConfirmPage implements OnInit {
     }else{
       this.apiService.getAccountInfo(account_address).then((response) => {
         var accountData:any = response;
+        accountData = accountData.account;
         this.currentBalance = accountData.amount;
         return this.currentBalance;
       });

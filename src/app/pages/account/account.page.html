@@ -1,6 +1,6 @@
 <ion-content fullscreen>
   <div class="main-header">
-    <ion-avatar slot="start">
+    <ion-avatar slot="start" (click)="header.openMenu()">
       <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
     </ion-avatar>
  <ion-grid>
@@ -8,13 +8,16 @@
   <ion-col>
     <ion-list>
       <!-- <ion-button color="primary" fill="clear">Back</ion-button> -->
-        <ion-item lines="none" *ngFor="let item of accountListWithAmount" (click)="changeAccount(item)">
-          <ion-icon slot="start" color="primary" name="save"></ion-icon>
+        <ion-item lines="none" *ngFor="let item of accountListWithAmount" (click)="changeAccount(item.account)">
+          <button slot="start" (click)="presentNameInputAlert(item.account)">
+            <ion-icon color="primary" name="pencil"></ion-icon>
+          </button>
           <ion-label size="large" class="ion-text-wrap">
             <p>{{item.account.name}}</p>
             <p class="wrap-text">{{item.account.addr}}</p>
           </ion-label>
           <ion-text slot="end" [color]="dark">{{item.amount}}</ion-text>
+          <ion-icon slot="end" [hidden]="item.account.isNotMain" [color]="success" name="checkmark"></ion-icon>
         </ion-item>
     </ion-list>
   </ion-col>

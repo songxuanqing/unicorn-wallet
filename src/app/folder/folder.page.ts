@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -9,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 export class FolderPage implements OnInit {
   public folder: string;
 
-  constructor(private activatedRoute: ActivatedRoute) { }
+  constructor(private header:HeaderService,private activatedRoute: ActivatedRoute) { }
 
   ngOnInit() {
     this.folder = this.activatedRoute.snapshot.paramMap.get('id');

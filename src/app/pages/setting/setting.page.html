@@ -1,6 +1,6 @@
 <ion-content fullscreen>
   <div class="main-header">
-    <ion-avatar slot="start">
+    <ion-avatar slot="start" (click)="header.openMenu()">
       <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
     </ion-avatar>
  <ion-grid >
@@ -23,6 +23,13 @@
             <ion-select placeholder="{{networkSelected}}"  (ionChange)="selectNetworkChange($event)">
               <ion-select-option *ngFor="let item of networkList" value="{{item}}">{{item}}</ion-select-option>
             </ion-select>
+          </ion-item>
+
+          <ion-item (click)="goToChangePasswordPage()">
+            <ion-text class="highlight ion-margin-top ion-margin-bottom ion-margin-end">
+              Change Password
+            </ion-text>
+            <ion-icon size="small" name="caret-forward-outline"></ion-icon>
           </ion-item>
           
       </ion-col>

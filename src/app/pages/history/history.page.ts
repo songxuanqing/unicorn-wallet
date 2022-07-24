@@ -1,4 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
@@ -27,7 +28,8 @@ export class HistoryPage implements OnInit {
   constructor(private router:Router,
     private route:ActivatedRoute,
     private apiService: Blockchain2Service,
-    private blockchainSDKService: Blockchain3Service) { 
+    private blockchainSDKService: Blockchain3Service,
+    private header:HeaderService,) { 
 
     }
 
@@ -84,7 +86,9 @@ export class HistoryPage implements OnInit {
     this.assetInfo.push(all);
     this.assetInfo.push(coin);
     this.apiService.getAccountInfo(address).then(async (response) => {
+      console.log("his",response);
       var accountData:any = response;
+      accountData = accountData.account;
       console.log(accountData.assets);
       accountData.assets.forEach(async (item)=>{
       var token = new Token();
@@ -101,6 +105,7 @@ export class HistoryPage implements OnInit {
     return this.apiService.getAssetInfo(asset_id).then((response) =>
       {
         var tokenData: any = response;
+        tokenData = tokenData.asset;
         tk.name = tokenData.params.name;
         tk.url = tokenData.params.url;
         tk['unit-name'] = tokenData.params['unit-name'];

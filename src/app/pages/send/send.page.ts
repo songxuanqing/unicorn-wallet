@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
@@ -23,6 +24,7 @@ export class SendPage implements OnInit {
     private blockchainSDKService: Blockchain3Service,
     public toastController: ToastController,
     private storageService: StorageService,
+    private header:HeaderService,
     ) {
 
    }

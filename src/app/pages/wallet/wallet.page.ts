@@ -1,11 +1,11 @@
-import { Component, OnInit,  } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Account } from '../../models/account';
 import { Token } from '../../models/token';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
-import { HeaderService } from '../../services/header.service';
 import { BuyService } from '../../services/buy.service';
 import { PriceService } from '../../services/price.service';
 import { StorageService } from '../../services/storage.service';
@@ -53,10 +53,6 @@ export class WalletPage implements OnInit {
     this.account.name = routerState.account.name;
     this.getAccountInfo(this.account.address);
     this.createBuyUrls();
-  }
-
-  openMenu() {
-    this.header.openMenu();
   }
 
   ionViewDidEnter(){

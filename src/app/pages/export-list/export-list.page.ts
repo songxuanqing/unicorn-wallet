@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
@@ -19,7 +20,9 @@ export class ExportListPage implements OnInit {
     private route:ActivatedRoute,
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service,
-    private storageService: StorageService,) { }
+    private storageService: StorageService,
+    private header:HeaderService,
+    ) { }
 
   ngOnInit() {
   }
@@ -39,6 +42,7 @@ export class ExportListPage implements OnInit {
     return new Promise((resolve)=>{
       for(var i = 0; i<responseToAny.length; i++){
         var accountStored:AccountStored = {
+         isMain:false,
          name:"",
          addr:"",
          mnemonic:"",
@@ -47,6 +51,7 @@ export class ExportListPage implements OnInit {
          [key:string]: any
        }
        var temp:Temp = responseToAny[i];
+       accountStored.isMain = temp.isMain;
        accountStored.name = temp.name;
        accountStored.addr = temp.addr;
        accountStored.mnemonic = temp.mnemonic;
@@ -64,6 +69,7 @@ export class ExportListPage implements OnInit {
     for (var item of this.accountListWithAmount){
       var response = await this.apiService.getAccountInfo(item.account.addr)
       var accountData:any = response;
+      accountData = accountData.account;
       var accountAmount:number = accountData.amount;
       item.amount = accountAmount;
     }

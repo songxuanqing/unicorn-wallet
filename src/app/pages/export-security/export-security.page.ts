@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ModalController } from '@ionic/angular';
 import { StorageService } from '../../services/storage.service';
@@ -28,7 +29,8 @@ export class ExportSecurityPage implements OnInit {
     private modalCtrl: ModalController,
     private storageService: StorageService,
     private clipboard:ClipboardService,
-    public toastController: ToastController,) { }
+    public toastController: ToastController,
+    private header:HeaderService,) { }
 
   ngOnInit() {
     const routerState = this.router.getCurrentNavigation().extras.state;

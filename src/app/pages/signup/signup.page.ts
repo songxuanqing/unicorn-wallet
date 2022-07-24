@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { HeaderService } from '../../services/header.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { StorageService } from '../../services/storage.service';
 import { AccountStored } from '../../models/account-stored';
@@ -17,7 +18,9 @@ export class SignupPage implements OnInit {
   constructor(private router:Router,
     private route:ActivatedRoute,
     private blockchainSDKService: Blockchain3Service,
-    private storageService: StorageService,) { }
+    private storageService: StorageService,
+    private header:HeaderService,
+    ) { }
 
   ngOnInit() {
   }
@@ -65,13 +68,11 @@ export class SignupPage implements OnInit {
         return true;
       }
     }
-
-}
+  }
 
   hashAndStorePw(pw){
     return new Promise(async resolve=>{
       await this.storageService.setHashedEncryption("keyForUser",pw,pw);
-      //await this.storageService.getHashedDecryption("keyForUser",pw);
       return resolve(true);
     })
   }

@@ -19,14 +19,13 @@ export class AppComponent {
     { 
       title: 'Setting', 
       url: '/setting', 
-      icon: 'shield-checkmark' 
+      icon: 'settings' 
     }, 
     { 
-      title: 'Log Out', 
+      title: 'Lock', 
       url: '/folder/LogOut', 
-      icon: 'log-out' 
+      icon: 'lock-closed' 
     } 
   ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
   constructor() {}
 }
