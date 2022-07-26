@@ -5,30 +5,35 @@ ion-input {
 }
 ion-text {
     text-align: right;
-	  padding-left: 10px;
     font-size: 13px;
     font-weight: bold;
 }
 ion-button{
     font-weight: bold;
 }
+
+
+.div-display-inline{
+  display: inline;
+  margin-bottom: 10px;
+}
+
+.display-grid{
+  display: grid;
+  
+}
+
 .verticalBottom{
     align-self: flex-end;
     text-align: right !important;
 }
   
 .wrap-text {
-    margin: 13px 8px 13px 0;
-    margin: 0;
-    display: block;
-    overflow: hidden;
-    -webkit-box-flex: 1;
-    -webkit-flex: 1;
-    -ms-flex: 1;
-    flex: 1;
-    font-size: inherit;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  white-space:normal;
+  overflow-wrap: anywhere;
+}
+.edit-button{
+  background: none;
 }
 
 ion-header {
@@ -66,6 +71,7 @@ ion-header {
               ion-label {
                 font-size: 1.4rem;
                 font-weight: bold;
+                
                 letter-spacing: 0.5px;
                 text-shadow: 1px 1px 1px var(--ion-color-medium);
               }

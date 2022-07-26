@@ -35,18 +35,16 @@ export class SignupPage implements OnInit {
   }
 
   checkValidation(ev:any){
-    let typedPw = ev.target.value;
-    if(!this.validatePassword(typedPw)){
-      //에러 메세지 팝업
+    if(!this.validatePassword(ev.target.value)){
+      this.pw = "error";
     }else{
-      this.pw = typedPw;
+      this.pw = ev.target.value;
     }
   }
 
   checkConfirm(ev:any){
-    let confirmPw = ev.target.value;
-    if(this.pw == confirmPw){
-      this.confirmedPw = this.pw;
+    this.confirmedPw = ev.target.value;
+    if(this.pw == this.confirmedPw){
       this.isDisabledSignUp = false;
     }else{
 

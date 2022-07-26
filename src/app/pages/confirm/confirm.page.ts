@@ -5,6 +5,7 @@ import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { AccountStored } from '../../models/account-stored';
 import { StorageService } from '../../services/storage.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-confirm',
@@ -30,6 +31,7 @@ export class ConfirmPage implements OnInit {
     private blockchainSDKService: Blockchain3Service,
     private storageService: StorageService,
     private header:HeaderService,
+    private navigation:NavigationService,
     ) {
       
    }
@@ -77,10 +79,11 @@ export class ConfirmPage implements OnInit {
     }
     //니모닉 가져와서 전달
     var mnemonic = await this.getMnemonic(this.sender);
+    var txnId;
     this.blockchainSDKService.sendTxn(this.sender,mnemonic,this.receiver,this.token_id,this.sent_amount,isAssetTransfer).then(async(response)=>{
       console.log(response);
-    });
-    //최근 보낸 주소 저장.
+      txnId = response;
+       //최근 보낸 주소 저장.
     this.setRecentlySentAddresses(this.receiver);
     //만약 외부에서 요청한 것일 경우 sendTxn 데이터가 저장되어 있을 것이므로
     //해당 데이터가 DB에 있다면 wallet으로 이동하고, DB 초기화
@@ -89,6 +92,7 @@ export class ConfirmPage implements OnInit {
       const navigationExtras: NavigationExtras = {
         state: {
           txnParams:{
+            txnId:txnId,
             done:true,
           },
           account:this.account,
@@ -100,12 +104,15 @@ export class ConfirmPage implements OnInit {
       const navigationExtras: NavigationExtras = {
         state: {
           txnParams:{
+            txnId:txnId,
             done:true,
           },
         },
       };
       this.router.navigateByUrl('/wallet',navigationExtras);
     }
+    });
+   
   }
 
   //db에 최근 보낸 주소를 가져온 다음, 현재 항목을 추가해서 다시 저장.
@@ -120,19 +127,17 @@ export class ConfirmPage implements OnInit {
         }else{
           recentlySentAddresses = [];
         }
-        var isExistSameAddress = false;
+        var numberOfSameAddress = 0;
         //기존에 저장된 주소에서 현재 전송한 주소와 동일한 주소가 있는지 확인
         //하나라도 존재할 경우 true이므로, 추가 저장하지 않는다.
         //아닐 경우 배열에 추가한 후 저장한다.
         recentlySentAddresses.forEach(item=>{ 
-          if(item!=receiver){
-            isExistSameAddress = false; 
-          }else{
-            isExistSameAddress = true;
+          if(item==receiver){
+            numberOfSameAddress++; 
           }
         });
-        //최초 생성일 경우 빈 배열이므로, forEach문에 해당하지 않아, isExistSameAddress = false;
-        if(!isExistSameAddress){
+        //최초 생성일 경우 빈 배열이므로, forEach문에 해당하지 않아, numberOfSameAddress==0;
+        if(numberOfSameAddress==0){
           recentlySentAddresses.push(receiver); 
         };
         var recentlySentObj = {addressList:recentlySentAddresses}; //{addressList:[A,B,C]}

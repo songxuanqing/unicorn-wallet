@@ -13,6 +13,7 @@ import { ChangePWModal } from './change-pw-modal';
 
 export class ChangePWPage {
   pw = "";
+  isCorrectPw = null;
 
   constructor( private router:Router,
     private route:ActivatedRoute,
@@ -22,11 +23,16 @@ export class ChangePWPage {
   
   //현재 비밀번호 Next눌러 입력 후 아래 함수 호출
   async unlock(pw){
-    var isConfirmed = await this.storageService.getHashedDecryption("keyForUser",pw);
-    console.log("isConfirmed",isConfirmed);
-    if(isConfirmed){
-      //확인될 경우 새로운 비밀번호 입력 modal열기
-      this.openChangePWModal();
+    try{
+      this.isCorrectPw = await this.storageService.getHashedDecryption("keyForUser",pw);
+      if(this.isCorrectPw){
+        //확인될 경우 새로운 비밀번호 입력 modal열기
+        this.openChangePWModal();
+      }else{
+        this.isCorrectPw = false;
+      };
+    }catch(e){
+      this.isCorrectPw = false;
     };
   };
 

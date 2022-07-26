@@ -14,6 +14,7 @@
           <ion-item>
             <ion-label position="floating">PASSWORD</ion-label>
             <ion-input [(ngModel)]="pw" type="password"></ion-input>
+            <ion-note slot="error" class="slot-error" *ngIf="isCorrectPw!=null&&!isCorrectPw">Incorrect password</ion-note>
           </ion-item>
           <ion-button color="primary" expand="block" shape="round" size="full" class="ion-margin-top" (click)="unlock(pw)">NEXT</ion-button>
 

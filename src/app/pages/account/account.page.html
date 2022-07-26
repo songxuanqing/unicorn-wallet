@@ -8,16 +8,18 @@
   <ion-col>
     <ion-list>
       <!-- <ion-button color="primary" fill="clear">Back</ion-button> -->
-        <ion-item lines="none" *ngFor="let item of accountListWithAmount" (click)="changeAccount(item.account)">
-          <button slot="start" (click)="presentNameInputAlert(item.account)">
+        <ion-item lines="none" class="wrap-text" [color]="item.account.isMain?'success':'light'" *ngFor="let item of accountListWithAmount">
+          <button slot="start" class="edit-button" (click)="presentNameInputAlert(item)">
             <ion-icon color="primary" name="pencil"></ion-icon>
           </button>
-          <ion-label size="large" class="ion-text-wrap">
-            <p>{{item.account.name}}</p>
-            <p class="wrap-text">{{item.account.addr}}</p>
-          </ion-label>
-          <ion-text slot="end" [color]="dark">{{item.amount}}</ion-text>
-          <ion-icon slot="end" [hidden]="item.account.isNotMain" [color]="success" name="checkmark"></ion-icon>
+          <div class="ion-margin-botton div-display-inline" (click)="changeAccount(item)">
+            <ion-label size="large" class="wrap-text">
+              <p>{{item.account.name}}</p>
+              <p >{{item.account.addr}}</p>
+            </ion-label>
+            <ion-text slot="end" [color]="dark">{{item.amount}} mAlgos</ion-text>
+          </div>
+
         </ion-item>
     </ion-list>
   </ion-col>

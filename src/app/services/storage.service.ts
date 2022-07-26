@@ -43,14 +43,11 @@ export class StorageService {
           chrome.storage.local.set({[key]: value}, function() {
             //key변수를 key 요소에 할당
             //value변수를 value요소에 할당
-            console.log('Key is set to ' + key);
-            console.log('Value is set to ' + value);
             return resolve("done");
           });
         }catch(e){
           console.log(e);
         }
-        
       })
     }
   }
@@ -62,7 +59,6 @@ export class StorageService {
       return new Promise(async(resolve)=>{
         var { value } = await Storage.get({ key: key });
         //key요소 종 요소 값이 key변수값인것 가져오기
-        console.log(`check name ${value}!`);
         return resolve(value);
       })
     }else{
@@ -70,7 +66,6 @@ export class StorageService {
         if(key=="accounts"){
           chrome.storage.local.get([key], function(result) {
             //key요소 종 요소 값이 key변수값인것 가져오기
-            console.log("result.accounts",result)
             //결과값이 object로 반환되는데, 이때 요소 값은 각각 key명으로 할당되어 있다.
             //따라서 result.key변수명String같이 사용한다.
             return resolve(result.accounts);
@@ -78,33 +73,30 @@ export class StorageService {
         }
         else if(key=="keyForUser"){
           chrome.storage.local.get([key], function(result) {
-            console.log("result.keyForUser",result)
             return resolve(result.keyForUser);
         });  
         }
         else if(key=="sendTxn"){
           chrome.storage.local.get([key], function(result) {
-            console.log("result.keyForUser",result)
             return resolve(result.sendTxn);
         });
         }
         else if(key=="recentlySent"){
           chrome.storage.local.get([key], function(result) {
-            console.log("result.keyForUser",result)
             return resolve(result.recentlySent);
         });
         }
         else if(key=="currency"){
           chrome.storage.local.get([key], function(result) {
-            console.log("result.keyForUser",result)
             return resolve(result.currency);
         });
         }
         else if(key=="network"){
           chrome.storage.local.get([key], function(result) {
-            console.log("result.keyForUser",result)
             return resolve(result.network);
         });
+        }else{
+          return reject(new Error("Error!"));
         }
     })
     return callbackPromise;
@@ -135,32 +127,29 @@ export class StorageService {
  //pw를 입력해 hash된 pw를 가져와 입력된 pw와 비교한다.
   public getHashedDecryption(key:string, encryptionKey:string){
     //encryptionKey = pw
-    console.log("key",key);
-    return new Promise((response)=>{
+    return new Promise((resolve,reject)=>{
       //encryptionKey = pw를 입력해서 keyForUser의 암호화된 hashedpw를 가져온다.
-      this.getDecryption(key,encryptionKey).then(async(resolve)=>{//keyForUser -> hash
-        var responseToAny:any = resolve; //JSON 객체로 반환된 원래값. undefined를 any로 할당해서 String변환
+      this.getDecryption(key,encryptionKey).then(async(response)=>{//keyForUser -> hash
+        var responseToAny:any = response; //JSON 객체로 반환된 원래값. undefined를 any로 할당해서 String변환
         var encryptedValue = responseToAny;
-        console.log('getHashedDecryption',encryptedValue);
         //가져온 hash pw와 입력된 pw 비교
         //동일할 경우 validPassword는 true이다.
         var validPassword = await bcrypt.compare(encryptionKey,encryptedValue);
         if(validPassword){ //hash String과 입력한 값이 일치하는지 확인
-          console.log("true?");
           this.hashedKey = encryptedValue; //전역변수로 선언된 hashedKey에 값 할당.
-          return response(true); //로그인 통과용 response, true면 로그인 통과
+          return resolve(true); //로그인 통과용 response, true면 로그인 통과
         }else{
-          console.log("false?");
-          return response(false);
-        }
-      }) 
+          return resolve(false);
+        };
+      }).catch(err=>{
+        return reject(err);
+      });
     })
   }
 
   //저장소에 key:value로 저장한다. 이때 value는 encryptionKey로 암호화해서 암호화된 값으로 저장한다.
   public setEncryption(key: string, value: any, encryptionKey:string|null){
     return new Promise (resolve=>{
-      console.log("hashedpw",value);
       //암호화대상은 string 이여야 하므로 string으로 변환한다.
       var valueToString = JSON.stringify(value); 
       var k:string = "";
@@ -175,11 +164,9 @@ export class StorageService {
       }
       var rk = String(k).padEnd(32, padding); // AES256은 key 길이가 32자여야 함. hash256는 이미 32byte이므로 불필요
       var b = valueToString;
-      console.log("key",rk,"value",b);
       var eb = this.encodeByAES256(rk, b); //32자 키로, string value를 암호화
-      console.log(eb); //암호화된 해시
+       //암호화된 해시
       this.set(key, eb).then(()=>{ //key:keyForUser 와 암호호된 hash저장
-        console.log("set to the db");
         return resolve("done");
       });
     })
@@ -188,30 +175,30 @@ export class StorageService {
 
   //암호화된 값을 복호화해서 가져온다.
   public getDecryption = (key:string, encryptionKey:string|null) => {
-    console.log("key",key);
-    return new Promise(async(resolve)=>{
-      var encryptedValue = await this.get(key); //암호화된 정보:hash,account
-      var k:string="";
-      var padding:string ="";
-      if(encryptionKey!=null){
-        //회원가입과 같이 pw를 입력하는 경우는 해당 값이 null이 아니다.
-        //암호화하는 키로서 입력받은 pw를 사용한다.
-        k = encryptionKey;
-        padding = encryptionKey.repeat(2);
-        //AES256은 key길이가 32자여야 하므로 32를 맞추기 위한 패딩 필요한데,
-        //패딩값으로 입력된 비밀번호/hashedPW를 2번 반복해서 준비한다.
-      }else{
-        //이미 로그인한 상태에서 니모닉을 통한 서명을 가져올 때, 니모닉 정보를 가져와야 하므로,
-        //기존에 존재하는 해시화된 pw를 반환한다. 이 값이 account를 복호화하는 key이다.
-        k = this.hashedKey;
+    return new Promise(async(resolve,reject)=>{
+      try{
+        var encryptedValue = await this.get(key); //암호화된 정보:hash,account
+        var k:string="";
+        var padding:string ="";
+        if(encryptionKey!=null){
+          //회원가입과 같이 pw를 입력하는 경우는 해당 값이 null이 아니다.
+          //암호화하는 키로서 입력받은 pw를 사용한다.
+          k = encryptionKey;
+          padding = encryptionKey.repeat(2);
+          //AES256은 key길이가 32자여야 하므로 32를 맞추기 위한 패딩 필요한데,
+          //패딩값으로 입력된 비밀번호/hashedPW를 2번 반복해서 준비한다.
+        }else{
+          //이미 로그인한 상태에서 니모닉을 통한 서명을 가져올 때, 니모닉 정보를 가져와야 하므로,
+          //기존에 존재하는 해시화된 pw를 반환한다. 이 값이 account를 복호화하는 key이다.
+          k = this.hashedKey;
+        }
+        var rk = String(k).padEnd(32, padding); // AES256은 key 길이가 32자여야 함
+        var eb = encryptedValue;
+        var b = this.decodeByAES256(rk, eb);
+        return resolve(JSON.parse(b)); //원래값 반환. JSON객체 형태로 변경하여 반환
+      }catch(e){
+        return reject(new Error("Error!"));
       }
-      console.log(this.hashedKey);
-      var rk = String(k).padEnd(32, padding); // AES256은 key 길이가 32자여야 함
-      var eb = encryptedValue;
-      console.log("key",rk,"value",eb);
-      var b = this.decodeByAES256(rk, eb);
-      console.log('Item:',JSON.parse(b));
-      return resolve(JSON.parse(b)); //원래값 반환. JSON객체 형태로 변경하여 반환
     })
   }
 

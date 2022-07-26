@@ -3,17 +3,21 @@
     <ion-avatar slot="start" (click)="header.openMenu()">
       <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
     </ion-avatar>
-  </div>
+  
   <ion-grid>
     <ion-row class="ion-margin-horizontal ion-margin-top">
-      <ion-card>    
-        <ion-card-content>
+      <ion-col>
+        <ion-list>
+          
           <ion-item>
+            <div>
+              <ion-button color="primary" fill="clear" (click)="navigation.goBack()">Back</ion-button>
+            </div>
             <ion-label position="floating">To: </ion-label>
             <ion-input type="text" (ionChange)='isValidAddress($event.target.value)' [(ngModel)]="receiver"></ion-input>
           </ion-item>
-        </ion-card-content>
-      </ion-card>
+        </ion-list>
+      </ion-col>
     </ion-row>
     <ion-row>
       <ion-col>
@@ -28,4 +32,5 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+</div>
 </ion-content>

@@ -83,6 +83,7 @@ export class ImportOrCreatePage implements OnInit {
   async handleToastController(message){
     const toast = await this.toastController.create({
       message: message,
+      duration: 500,
       icon: 'information-circle',
       position: 'top',
       buttons: [

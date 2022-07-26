@@ -4,6 +4,7 @@ import { Blockchain3Service } from '../../services/blockchain3.service';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import { StorageService } from '../../services/storage.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-send',
@@ -25,6 +26,7 @@ export class SendPage implements OnInit {
     public toastController: ToastController,
     private storageService: StorageService,
     private header:HeaderService,
+    private navigation:NavigationService,
     ) {
 
    }
@@ -60,9 +62,12 @@ export class SendPage implements OnInit {
       var isValid = response;
       if(isValid){
         this.goToConfirmPage(address);
-      }
+      }else{
+        this.presentToastWithOptions("It is invalid address. Please check again.");
+        this.receiver = "";
+      };
     })
-    .then(reject=>{
+    .catch(reject=>{
       //유효하지 않은 주소 에러 발생 시 메세지 띄우고 입력창 초기화
         this.presentToastWithOptions(reject);
         this.receiver = "";
@@ -83,9 +88,9 @@ export class SendPage implements OnInit {
   }
   
 
-  async presentToastWithOptions(e) {
+  async presentToastWithOptions(message) {
     const toast = await this.toastController.create({
-      message: e,
+      message: message,
       duration: 500,
       icon: 'information-circle',
       position: 'top',

@@ -8,6 +8,7 @@ import { Token } from '../../models/token';
 import { IonModal } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { IonInfiniteScroll } from '@ionic/angular';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-history',
@@ -29,7 +30,9 @@ export class HistoryPage implements OnInit {
     private route:ActivatedRoute,
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service,
-    private header:HeaderService,) { 
+    private header:HeaderService,
+    private navigation:NavigationService,
+    ) { 
 
     }
 
@@ -258,5 +261,7 @@ export class HistoryPage implements OnInit {
       this.parseAndPushTransactionHistory(response);
     });
   }
+
+
 
 }

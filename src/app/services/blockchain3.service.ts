@@ -226,6 +226,7 @@ handleError(error: HttpErrorResponse) {
       let signedTxn = algosdk.signTransaction(txn, recoveredAccount.sk);
       let sendTx = await algodClient.sendRawTransaction(signedTxn.blob).do();
       console.log("Transaction : " + sendTx.txId);
+      return resolve(sendTx.txId);
   })
 }
 

@@ -8,6 +8,41 @@ ion-header {
     }
   }
 
+  .splash{
+    color:white;
+    text-align: center;
+    justify-content: center;
+    font-size: 15px;
+    align-items: center;
+    position: fixed; /* Sit on top of the page content */
+    display: block; /* Hidden by default */
+    width: 100%; /* Full width (cover the whole page) */
+    height: 100%; /* Full height (cover the whole page) */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    //background: url('../../../assets/img/splash.gif') fixed;;
+    background-color: rgba(0,0,0,0.98); /* Black background with opacity */
+    z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+    cursor: pointer; /* Add a pointer on hover */
+
+  }
+  .splash-center{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60%;
+  }
+  .splash-spinner{
+    display: contents;
+  }
+
+  img.opac {
+    opacity: 0.8;
+    filter: alpha(opacity=80); /* IE8 및 그 이하 버전용 */
+    }
+    
   ion-content {
     * {
       font-family: lato;
@@ -85,14 +120,14 @@ ion-header {
         background: transparent;
         ion-item {
           width: 95%;
-          margin: auto;
+          margin: 10px 0;
           border-radius: 5px;
           margin-bottom: 2vh;
           p {
             font-size: 0.65rem;
           }
           ion-text {
-            font-weight: 800;
+            font-weight: bold;
           }
         }
       }

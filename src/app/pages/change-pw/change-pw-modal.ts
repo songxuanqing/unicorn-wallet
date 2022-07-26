@@ -10,9 +10,9 @@ import { StorageService } from '../../services/storage.service';
   templateUrl: './change-pw-modal.html',
 })
 export class ChangePWModal {
-  pw: string;
-  confirmedPw: string;
-  isDisabledSignUp = true;
+  private pw = ""; 
+  private confirmedPw = "";
+  public isDisabledSignUp = true;
   accountList:Array<AccountStored>;
   //저장된 account목록을 불러왔다가 새로운 비밀번호로 다시 저장하기 위함.
   constructor(private modalCtrl: ModalController,
@@ -46,13 +46,25 @@ export class ChangePWModal {
   }
 
   checkValidation(ev:any){
-    let typedPw = ev.target.value;
-    if(!this.validatePassword(typedPw)){
-      //에러 메세지 팝업
+    if(!this.validatePassword(ev.target.value)){
+      this.pw = "error";
     }else{
-      this.pw = typedPw;
+      this.pw = ev.target.value;
     }
   }
+
+  
+  //입력한 두개의 비밀번호가 일치하는지 확인
+  checkConfirm(ev:any){
+    this.confirmedPw = ev.target.value;
+    if(this.pw == this.confirmedPw){
+      this.isDisabledSignUp = false;
+    }else{
+
+    }
+
+  }
+
 
   //비밀번호가 정규식에 맞게 유효한지 확인
   validatePassword(pw) {
@@ -69,18 +81,6 @@ export class ChangePWModal {
         return true;
       }
     }
-  }
-
-  //입력한 두개의 비밀번호가 일치하는지 확인
-  checkConfirm(ev:any){
-    let confirmPw = ev.target.value;
-    if(this.pw == confirmPw){
-      this.confirmedPw = this.pw;
-      this.isDisabledSignUp = false;
-    }else{
-
-    }
-
   }
 
   

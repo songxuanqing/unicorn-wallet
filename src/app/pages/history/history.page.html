@@ -7,9 +7,11 @@
   <ion-row class="ion-margin-top">
   <ion-col>
     <ion-list>
-      <ion-button color="primary" fill="clear">Back</ion-button>
+      <ion-button color="primary" fill="clear" (click)="navigation.goBack()">Back</ion-button>
       <ion-button color="primary" fill="clear" id="open-history-modal" class="verticalBottom" (click)="getTokenList(account_address)">Search by Token</ion-button>
-      <ion-note [hidden]="isHistoryExist"> There is no transaction history</ion-note>
+      <div>
+        <ion-note [hidden]="isHistoryExist"> There is no transaction history</ion-note>
+      </div>
       <ion-accordion-group>
         <ion-accordion *ngFor="let item of historyList">
           <ion-item slot="header" color="light" class="item-display">

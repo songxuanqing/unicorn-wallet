@@ -13,10 +13,12 @@
       <ion-item>
         <ion-label position="floating" >PASSWORD</ion-label>
         <ion-input type="password" (input)='checkValidation($event)'></ion-input>
+        <ion-note slot="error" class="slot-error" *ngIf="pw!=''&&pw=='error'">Invalid password format</ion-note>
       </ion-item>
       <ion-item>
         <ion-label position="floating" >CONFIRM PASSWORD</ion-label>
         <ion-input type="password" (input)='checkConfirm($event)'></ion-input>
+        <ion-note slot="error" class="slot-error" *ngIf="confirmedPw!=''&&pw!=confirmedPw">It is not same as password</ion-note>
       </ion-item>
         <ion-button color="primary" disabled="{{isDisabledSignUp}}" expand="block" shape="round" size="full" class="ion-margin-top" (click)="signup()">SIGN UP</ion-button>
     </ion-card-content>

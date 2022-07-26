@@ -15,6 +15,9 @@ import { Clipboard } from '@ionic-native/clipboard/ngx';
 import { Blockchain2Service } from './services/blockchain2.service';
 import { Blockchain3Service } from './services/Blockchain3.service';
 import { StorageService } from './services/storage.service';
+import { GetAccountService } from './services/get-account.service';
+
+
 
 @NgModule({
   declarations: [AppComponent],
@@ -25,7 +28,7 @@ import { StorageService } from './services/storage.service';
   registrationStrategy: 'registerWhenStable:30000'
 }),],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    FileOpener,File,HeaderService,Clipboard, Blockchain2Service,  Blockchain3Service, StorageService],
+    FileOpener,File,HeaderService,Clipboard, Blockchain2Service,  Blockchain3Service, StorageService, GetAccountService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

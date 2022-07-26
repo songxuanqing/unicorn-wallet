@@ -11,6 +11,7 @@ import { PriceService } from '../../services/price.service';
 import { StorageService } from '../../services/storage.service';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { Currency } from '../../const/currency';
+import { GetAccountService } from '../../services/get-account.service';
 
 @Component({
   selector: 'app-wallet',
@@ -18,7 +19,7 @@ import { Currency } from '../../const/currency';
   styleUrls: ['./wallet.page.scss'],
 })
 export class WalletPage implements OnInit {
-  public account:Account;
+  public account:Account = new Account();
   public assetInfo:Array<any> = [];
   public tokenInfo:Array<any> = [];
   public NFTInfo:Array<any> = [];
@@ -26,14 +27,12 @@ export class WalletPage implements OnInit {
   public isBackFromTxn:boolean = false;
   public buyUrlList:Array<any> = [];
   public balanceToCurrency:number;
-  public balanceToCurrencyToString:string;
+  public balanceToCurrencyToString:string = "0";
   public isTokenHoldings:boolean = true; //토큰보유여부, 보유할 경우(true), hidden된다.(hidden=true)
   public isNFTHoldings:boolean = true;// NFT보유여부, 보유할 경우(true), hidden된다.(hidden=true)
-  
-  currency = 'USD'; //test currency, 이후 setting 값에서 가져올 예정.
+  currency = 'USD';
   symbol = '$';
-  test_token_id = 94434081;
-  //test_account='5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU';
+  isCompletedToLoadData = false;
   constructor(
     private header:HeaderService,
     public apiService: Blockchain2Service,
@@ -44,13 +43,14 @@ export class WalletPage implements OnInit {
     private buyService:BuyService,
     private priceService:PriceService,
     private storageService:StorageService,
+    private getAccount:GetAccountService,
   ) {
     this.account = new Account();
   }
   ngOnInit() {
-    const routerState = this.router.getCurrentNavigation().extras.state;
-    this.account.address = routerState.account.addr;
-    this.account.name = routerState.account.name;
+    var accountToAny:any = this.getAccount.getAccount();
+    this.account.address = accountToAny.addr;
+    this.account.name = accountToAny.name;
     this.getAccountInfo(this.account.address);
     this.createBuyUrls();
   }
@@ -60,7 +60,7 @@ export class WalletPage implements OnInit {
     if(history.state!=undefined){
       this.isBackFromTxn = history.state.txnParams.done;
       if(this.isBackFromTxn){
-        this.presentToastWithOptions();
+        this.presentToastWithOptions(history.state.txnParams.txnId);
       }
     }
   }
@@ -112,6 +112,18 @@ export class WalletPage implements OnInit {
       accountData = accountData.account;
       this.account.address = accountData.address;
       this.account.amount = accountData.amount;
+
+      //저장소에서 사용자 지정 통화를 가져온다.
+      await this.getSelectedCurrency();
+      //주어진 통화기준 알고랜드 단가 가져와서 현재 가지고 있는 알고량에 곱하기
+      //전체 알고를 주어진 통화로 치환.
+      var unitPrice = await this.getUnitPriceWithCurrency(this.currency);
+      this.balanceToCurrency = this.account.amount * +unitPrice;
+      this.balanceToCurrency = Math.round(this.balanceToCurrency);
+      this.balanceToCurrencyToString = this.balanceToCurrency.toString()
+      .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","); //천단위 표시
+
+      //for map에서 변경. 비동기 처리할 경우 만약 tokenInfo 또는 NFTInfo배열이 길이 0
       for(var i=0; i<accountData.assets.length; i++){
         var item = accountData.assets[i];
         var token = new Token();
@@ -122,7 +134,8 @@ export class WalletPage implements OnInit {
         this.assetInfo.push(token);
         if(token.amount>1){
           this.tokenInfo.push(token);
-        }else if(token.amount==1){
+        }
+        else if(token.amount==1){
           if(token.url.includes('ipfs://')){
             token = await this.getNFTImage(token);
           }
@@ -145,17 +158,20 @@ export class WalletPage implements OnInit {
       }else{
         this.isNFTHoldings = false;
       }
-
-      //저장소에서 사용자 지정 통화를 가져온다.
-      await this.getSelectedCurrency();
-      //주어진 통화기준 알고랜드 단가 가져와서 현재 가지고 있는 알고량에 곱하기
-      //전체 알고를 주어진 통화로 치환.
-      var unitPrice = await this.getUnitPriceWithCurrency(this.currency);
-      this.balanceToCurrency = this.account.amount * +unitPrice;
-      this.balanceToCurrency = Math.round(this.balanceToCurrency);
-      this.balanceToCurrencyToString = this.balanceToCurrency.toString()
-      .replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ","); //천단위 표시
+      this.isCompletedToLoadData = true;
       return this.account;
+    }).catch(e=>{
+      console.log(e);
+      if(this.tokenInfo.length>0){ 
+        this.isTokenHoldings = true;
+      }else{
+        this.isTokenHoldings = false;
+      }
+      if(this.NFTInfo.length>0){
+        this.isNFTHoldings = true;
+      }else{
+        this.isNFTHoldings = false;
+      }
     });
   }
   
@@ -183,12 +199,13 @@ export class WalletPage implements OnInit {
       })
   }
 
-  async presentToastWithOptions() {
+  async presentToastWithOptions(txnId) {
     const toast = await this.toastController.create({
-      message: "Transaction Successfully Requested",
+      message: "Transaction Successfully Requested.\n"+" Txn ID : \n"+txnId.toString(),
       duration: 500,
       icon: 'information-circle',
       position: 'top',
+      cssClass: 'toast-overflow',
       buttons: [
          {
           text: 'DONE',

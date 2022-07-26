@@ -146,7 +146,7 @@ export class Blockchain2Service {
       });
     }else{
       console.log(this.httpOptions,"httpOptions");
-      return await this.http
+      return this.http
       .get(this.indexer_path + '/v2/assets/' + assetId, this.httpOptions)
       .pipe(
         retry(2),

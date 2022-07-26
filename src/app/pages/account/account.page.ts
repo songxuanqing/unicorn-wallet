@@ -9,6 +9,7 @@ import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { IonModal,ToastController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { AlertController } from '@ionic/angular';
+import { GetAccountService } from '../../services/get-account.service';
 
 @Component({
   selector: 'app-account',
@@ -25,15 +26,7 @@ export class AccountPage implements OnInit {
   
   public accountList:Array<AccountStored> = [];
   public accountListWithAmount:Array<AccountWithAmount> = [];
-  test_account:AccountStored = {
-    name: "Account1",
-    addr: null,
-    mnemonic: null,
-  }
-  test_account_with_amount:AccountWithAmount = {
-    amount: 0,
-    account: this.test_account,
-  }
+  
   constructor( private router:Router,
     private route:ActivatedRoute,
     private apiService: Blockchain2Service,
@@ -42,6 +35,7 @@ export class AccountPage implements OnInit {
     public toastController: ToastController,
     private header: HeaderService,
     private alertController: AlertController,
+    private getAccountService:GetAccountService,
     ) { 
 
     }
@@ -51,15 +45,14 @@ export class AccountPage implements OnInit {
   }
   ionViewWillEnter(){
     this.getAccountList();
-    //this.getDevAccount();
   }
 
   createAccount(){
     this.blockchainSDKService.createAccount().then(async(response)=>{
       console.log(response);
-      var responseToString:any = response;
+      var responseToAny:any = response;
       var name = "Account"+(this.accountList.length + 1);
-      var responseArr = responseToString.split(":");
+      var responseArr = responseToAny.split(":");
       var newAccount:AccountStored = new AccountStored();
       newAccount.isMain = false;
       newAccount.name = name;
@@ -72,11 +65,19 @@ export class AccountPage implements OnInit {
       this.accountListWithAmount.push(newAccountWithAmount);
       console.log(this.accountList);
       this.storeAccount();
+
+      //싱글톤 getAccount서비스의 목록도 업데이트
+      var tempList = this.accountList;
+      for(var i = 0; i < tempList.length; i++){
+        var index = tempList.indexOf(tempList[i]);
+        tempList[index].mnemonic = "";
+      }
+      this.getAccountService.setAccountList(tempList);   
     });
   }
 
-  async storeAccount(){
-    await this.storageService.setEncryption("accounts",this.accountList, null);
+  storeAccount(){
+    return this.storageService.setEncryption("accounts",this.accountList, null);
   }
 
   getAccountList(){
@@ -109,16 +110,6 @@ export class AccountPage implements OnInit {
      }
      return resolve("done");
     })
-  }
-
-  getDevAccount(){
-    this.test_account.addr = "5QX5D4HPXQIQ3ODMGN6NTH6GO435N5GJSA72FBKSJI4WCAJ5VAXWTAF6UU";
-    this.test_account.mnemonic = "above luxury grocery barely obtain recipe record need card invest gold exclude market huge frozen wheat nation deal same option burst slam section about stone";
-    this.accountList.push(this.test_account);
-    this.accountListWithAmount.push(this.test_account_with_amount);
-    this.getAmountByAccount();
-    this.storeAccount();
-    this.getAccountList();
   }
 
   async getAmountByAccount(){
@@ -154,6 +145,7 @@ export class AccountPage implements OnInit {
   async handleToastController(message){
     const toast = await this.toastController.create({
       message: message,
+      duration: 500,
       icon: 'information-circle',
       position: 'top',
       buttons: [
@@ -185,37 +177,101 @@ export class AccountPage implements OnInit {
       this.accountListWithAmount.push(newAccountWithAmount);
       console.log(this.accountList);
       this.storeAccount();
+
+      //싱글톤 getAccount서비스의 목록도 업데이트
+      var tempList = this.accountList;
+      for(var i = 0; i < tempList.length; i++){
+        var index = tempList.indexOf(tempList[i]);
+        tempList[index].mnemonic = "";
+      }
+      this.getAccountService.setAccountList(tempList);  
+
       }else{
 
     }
   }
 
-  changeAccount(account){
+  async changeAccount(accountWithAmount){
+    var account = accountWithAmount.account;
     //mainAccount를 바꾼다.
+    //isMain=true인 새 계정을 만들고, 다른 리스트를 false로 수정한후, 
+    // 바꾸려는 아이템의 인덱스를 찾아 해당 아이템을 새 계정으로 바꾼다.
+    //html업데이틀 위해 배열을 지웠다가 새로 할당한다. (angular에게 참조 값 자체 변경 알림)
     var newAccount:AccountStored = new AccountStored();
     newAccount.isMain = true;
     newAccount.name = account.name;
     newAccount.addr = account.addr;
+    newAccount.mnemonic = account.mnemonic;
+    for(var i = 0; i<this.accountList.length; i++){
+      this.accountList[i].isMain = false;
+    }
     var index = this.accountList.indexOf(account);
     if (index !== -1) {
-      items[index] = newAccount;
+      this.accountList[index] = newAccount;
     }
-    this.storeAccount();
-    //노티피케이션 띄운다. (successfully changed)
+    await this.storeAccount();
 
+    //보유금액과 같이 있는 배열을 업데이트한다.
+    //새로 보유금액과 같이 있는 계정 아이템 생성해서 변경한 계정정보와 기존 금액 정보 가져와서
+    //보유금액과 같이 있는 배열 목록의 해당 아이템 교체 후 기존 배열 삭제 후 다시 추가(html 업데이트)
+    var newAccountWithAmount:AccountWithAmount = new AccountWithAmount();
+    newAccountWithAmount.account = newAccount;
+    newAccountWithAmount.amount = accountWithAmount.amount;
+    var index = this.accountListWithAmount.indexOf(accountWithAmount);
+    if (index !== -1) {
+      this.accountListWithAmount[index] = newAccountWithAmount;
+    }
+    var tempAccountWithAmountList = this.accountListWithAmount;
+    this.accountListWithAmount.slice();
+    this.accountListWithAmount = tempAccountWithAmountList;
+    this.handleToastController("The main account changed successfully.");
+    
+    //싱글톤 getAccount서비스의 목록도 업데이트
+    var tempList = this.accountList;
+    for(var i = 0; i < tempList.length; i++){
+      var index = tempList.indexOf(tempList[i]);
+      tempList[index].mnemonic = "";
+    }
+    this.getAccountService.setAccountList(tempList);   
   }
 
-  changeAccountName(newAccountName,account){
+  async changeAccountName(newAccountName,accountWithAmount){
+    var account = accountWithAmount.account;
     var newAccount:AccountStored = new AccountStored();
     newAccount.isMain = account.isMain;
     newAccount.name = newAccountName;
     newAccount.addr = account.addr;
+    newAccount.mnemonic = account.mnemonic;
     var index = this.accountList.indexOf(account);
     if (index !== -1) {
-      items[index] = newAccount;
+      this.accountList[index] = newAccount;
     }
-    this.storeAccount();
-    //html업데이트되는지 확인
+    console.log(this.accountList);
+    var tempAccountList = this.accountList;
+    this.accountList.slice();
+    this.accountList = tempAccountList;
+    await this.storeAccount();
+
+    //html업데이트 위해서 변수 재정의 후 배열 삭제 후 재생성
+    var newAccountWithAmount:AccountWithAmount = new AccountWithAmount();
+    newAccountWithAmount.account = newAccount;
+    newAccountWithAmount.amount = accountWithAmount.amount;
+    var index = this.accountListWithAmount.indexOf(accountWithAmount);
+    if (index !== -1) {
+      this.accountListWithAmount[index] = newAccountWithAmount;
+    }
+    var tempAccountWithAmountList = this.accountListWithAmount;
+    this.accountListWithAmount.slice();
+    this.accountListWithAmount = tempAccountWithAmountList;
+    this.handleToastController("The account name changed successfully.");
+    
+    //싱글톤 getAccount서비스의 목록도 업데이트
+    var tempList = this.accountList;
+    for(var i = 0; i < tempList.length; i++){
+      var index = tempList.indexOf(tempList[i]);
+      tempList[index].mnemonic = "";
+    }
+    this.getAccountService.setAccountList(tempList);  
   }
 
   goToExportPage(){
@@ -224,7 +280,7 @@ export class AccountPage implements OnInit {
     this.router.navigateByUrl('/export-list',navigationExtras);
   }
 
-  async presentNameInputAlert(account) {
+  async presentNameInputAlert(accountWithAmount) {
     const alert = await this.alertController.create({
       header: 'Please enter new account name',
       buttons: [
@@ -236,9 +292,9 @@ export class AccountPage implements OnInit {
         {
           text: 'OK',
           role: 'confirm',
-          handler: (accountName) => { 
-            console.log("input",accountName);
-            this.changeAccountName(accountName,account); }
+          handler: (input) => { 
+            console.log("input",input);
+            this.changeAccountName(input.accountName,accountWithAmount); }
         }
       ],
       inputs: [
