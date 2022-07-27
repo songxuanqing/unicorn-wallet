@@ -163,3 +163,27 @@ ion-modal ion-toolbar {
   --background: rgb(14 116 144);
   --color: white;
 }
+
+.wrap-text {
+  margin: 13px 8px 13px 0;
+  margin: 0;
+  display: block;
+  overflow: hidden;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  font-size: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.side-margin{
+  margin-left: 10px;
+  margin-right: 10px;
+
+}
+
+.display-flex{
+  display: flex;
+}

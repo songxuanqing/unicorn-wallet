@@ -17,10 +17,36 @@
       </ion-item>
         <ion-button color="primary" expand="block" shape="round" size="full" class="ion-margin-top" (click)="unlock(pw)">잠금 해제</ion-button>
       <div class="flex-center">
-        <ion-button color="primary" expand="block" shape="round" fill="clear" size="full">비밀번호를 잊으셨나요?</ion-button>
+        <ion-button color="primary" expand="block" shape="round" fill="clear" size="full" id="open-forgotPW-modal">비밀번호를 잊으셨나요?</ion-button>
       </div>
     </ion-card-content>
   </ion-card>
 </div>
+
+<ion-modal trigger="open-forgotPW-modal" (willDismiss)="onWillDismiss($event)">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button (click)="cancel()">Cancel</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <ion-item lines="none">
+        <ion-label class="title">
+          {{title}}
+        </ion-label>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-text class="introduction">
+          {{introduction}}
+        </ion-text>
+      </ion-item>
+      <ion-button color="primary" expand="block" shape="round" size="full" class="ion-margin-top" (click)="goToSignup()">Go To Sign Up</ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
 </ion-content>
 

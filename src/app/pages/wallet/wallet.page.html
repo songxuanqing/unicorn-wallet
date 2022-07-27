@@ -11,8 +11,17 @@
     </ion-avatar>
 
   <ion-grid>
-    <ion-row >
+    <ion-row class="ion-margin-top">
       <ion-col size="6">
+        <ion-label class="display-flex">
+          <ion-note color="light" class="wrap-text">
+            {{account.address}}
+          </ion-note>
+          <p>
+            <ion-icon name="copy" (click)="copy()"></ion-icon>
+          </p>
+        </ion-label>
+
         <ion-label>
           <ion-note color="light">
             TOTAL BALANCE
@@ -30,6 +39,7 @@
           </p>
         </ion-label>
       </ion-col>
+ 
     </ion-row>
 
     <ion-row class="ion-margin-horizontal ion-margin-top" >

@@ -4,6 +4,7 @@ import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { AccountStored } from '../../models/account-stored';
 import { GetAccountService } from '../../services/get-account.service';
+import { ModalController } from '@ionic/angular';
 
 @Component({
   selector: 'app-login',
@@ -15,11 +16,14 @@ export class LoginPage implements OnInit {
   isCorrectPw = null;
   account:AccountStored;
   accountList:Array<AccountStored> = [];
+  title = "Reset Wallet"
+  introduction = "Unicorn Wallet does not keep a copy of your password. If you’re having trouble unlocking your account, you will need to reset your wallet by signing up again. This action will delete your current wallet and Secret Recovery Phrase from this device, along with the list of accounts you’ve curated. After creating new password, please import a Secret Recovery Phrase(mnemonic) or create new account."
   constructor(private router:Router,
     private route:ActivatedRoute,
     private storageService: StorageService,
     private header:HeaderService,
     private getAccount: GetAccountService, //싱글톤 account 객체. 여러 페이지 참조 위함.
+    private modalCtrl: ModalController,
     ) { }
 
   ngOnInit() {
@@ -92,5 +96,14 @@ export class LoginPage implements OnInit {
     })
   }
 
+  goToSignup(){
+    let navigationExtra: NavigationExtras = {};
+    this.router.navigateByUrl('/signup',navigationExtra);
+    this.cancel();
+  }
+
+  cancel(){
+    return this.modalCtrl.dismiss(null, 'cancel');
+  }
 
 }

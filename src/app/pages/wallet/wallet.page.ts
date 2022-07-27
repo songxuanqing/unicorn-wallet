@@ -12,6 +12,7 @@ import { StorageService } from '../../services/storage.service';
 import getSymbolFromCurrency from 'currency-symbol-map';
 import { Currency } from '../../const/currency';
 import { GetAccountService } from '../../services/get-account.service';
+import { ClipboardService } from '../../services/clipboard.service';
 
 @Component({
   selector: 'app-wallet',
@@ -44,6 +45,7 @@ export class WalletPage implements OnInit {
     private priceService:PriceService,
     private storageService:StorageService,
     private getAccount:GetAccountService,
+    private clipboard:ClipboardService,
   ) {
     this.account = new Account();
   }
@@ -276,6 +278,35 @@ export class WalletPage implements OnInit {
           }
         });
     })
+  }
+
+  
+  async copy(){
+    var isCopied = await this.clipboard.copyString(this.account.address);
+    if(isCopied){
+      this.presentToastCopied();
+    }
+  }
+
+  async presentToastCopied() {
+    const toast = await this.toastController.create({
+      message: "Successfully Copied",
+      duration: 500,
+      icon: 'information-circle',
+      position: 'top',
+      buttons: [
+         {
+          text: 'DONE',
+          role: 'cancel',
+          handler: () => {
+            console.log('Cancel clicked');
+          }
+        }
+      ]
+    });
+    await toast.present();
+    const { role } = await toast.onDidDismiss();
+    console.log('onDidDismiss resolved with role', role);
   }
 
 
