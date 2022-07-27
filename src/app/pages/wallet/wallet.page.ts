@@ -13,6 +13,9 @@ import getSymbolFromCurrency from 'currency-symbol-map';
 import { Currency } from '../../const/currency';
 import { GetAccountService } from '../../services/get-account.service';
 import { ClipboardService } from '../../services/clipboard.service';
+import { ModalController } from '@ionic/angular';
+import { ImageFullScreenPage } from '../image-full-screen/image-full-screen.page';
+
 
 @Component({
   selector: 'app-wallet',
@@ -46,6 +49,7 @@ export class WalletPage implements OnInit {
     private storageService:StorageService,
     private getAccount:GetAccountService,
     private clipboard:ClipboardService,
+    private modalCtrl: ModalController,
   ) {
     this.account = new Account();
   }
@@ -254,11 +258,14 @@ export class WalletPage implements OnInit {
    getSelectedCurrency(){
     return new Promise(resolve=>{
         this.storageService.get("currency").then(response=>{
-          var responseJson = JSON.parse(response);
-          if(Object.keys(responseJson).length > 0){
-            this.currency = responseJson.currency;
-            this.symbol = responseJson.symbol;
-            return resolve(true);
+          var responseToAny:any = response;
+          if(responseToAny!=null){
+            var responseJson = JSON.parse(response);
+            if(Object.keys(responseJson).length > 0){
+              this.currency = responseJson.currency;
+              this.symbol = responseJson.symbol;
+              return resolve(true);
+            }
           }else{
             //만약 최초 사용자여서 currency 저장 기록이 없다면
             //USD를 default로 생성해서 저장 후 다시 불러온다.
@@ -275,7 +282,7 @@ export class WalletPage implements OnInit {
               this.symbol = responseJson.symbol;
               return resolve(false);
             });
-          }
+          };
         });
     })
   }
@@ -309,5 +316,14 @@ export class WalletPage implements OnInit {
     console.log('onDidDismiss resolved with role', role);
   }
 
+  //nft 이미지 크게 보기(모달열기)
+  openPreview(url){
+    this.modalCtrl.create({
+      component:ImageFullScreenPage,
+      componentProps:{
+        img:url
+      }
+    }).then(modal=>modal.present());
+  }
 
 }

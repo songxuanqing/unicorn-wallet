@@ -1,4 +1,4 @@
-<ion-content fullscreen>
+<ion-content [fullscreen]="true" color="dark">
   <div class="main-header">
     <ion-avatar slot="start" (click)="header.openMenu()">
       <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
@@ -7,7 +7,7 @@
   <ion-row class="ion-margin-top">
   <ion-col>
     <ion-list>
-      <!-- <ion-button color="primary" fill="clear">Back</ion-button> -->
+      <!-- <ion-button color="primary" fill="clear" (click)="navigation.goBack()">Back</ion-button> -->
         <ion-item lines="none" class="wrap-text" [color]="item.account.isMain?'success':'light'" *ngFor="let item of accountListWithAmount">
           <button slot="start" class="edit-button" (click)="presentNameInputAlert(item)">
             <ion-icon color="primary" name="pencil"></ion-icon>

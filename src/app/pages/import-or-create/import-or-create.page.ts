@@ -5,6 +5,7 @@ import { AccountStored } from '../../models/account-stored';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { IonModal,ToastController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
+import { GetAccountService } from '../../services/get-account.service';
 
 @Component({
   selector: 'app-import-or-create',
@@ -24,7 +25,9 @@ export class ImportOrCreatePage implements OnInit {
     private route:ActivatedRoute,
     private blockchainSDKService: Blockchain3Service,
     private storageService: StorageService,
-    public toastController: ToastController,) { }
+    public toastController: ToastController,
+    private getAccount: GetAccountService,
+    ) { }
 
   ngOnInit() {
 
@@ -113,7 +116,12 @@ export class ImportOrCreatePage implements OnInit {
         await this.storeAccount();
         newAccount.mnemonic = "";
         this.account = newAccount;
-        console.log(this.accountList);
+        
+        //싱글톤 account list 생성
+        var tempList:Array<AccountStored> = [];
+        tempList.push(newAccount);
+        this.getAccount.setAccountList(tempList);
+
         return resolve(true);
         }else{
   
@@ -139,6 +147,12 @@ export class ImportOrCreatePage implements OnInit {
         await this.storeAccount();
         newAccount.mnemonic = "";
         this.account = newAccount;
+
+        //싱글톤 account list 생성
+        var tempList:Array<AccountStored> = [];
+        tempList.push(newAccount);
+        this.getAccount.setAccountList(tempList);
+
         return resolve(true);
       });
     })

@@ -10,6 +10,7 @@ import { IonModal,ToastController } from '@ionic/angular';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { AlertController } from '@ionic/angular';
 import { GetAccountService } from '../../services/get-account.service';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-account',
@@ -36,15 +37,17 @@ export class AccountPage implements OnInit {
     private header: HeaderService,
     private alertController: AlertController,
     private getAccountService:GetAccountService,
+    private navigation:NavigationService,
     ) { 
 
     }
 
   ngOnInit() {
-
-  }
-  ionViewWillEnter(){
     this.getAccountList();
+  }
+
+  ionViewWillEnter(){
+    
   }
 
   createAccount(){

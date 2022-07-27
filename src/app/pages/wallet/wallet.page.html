@@ -1,4 +1,4 @@
-<ion-content [fullscreen]="true" color="light">
+<ion-content [fullscreen]="true" color="dark">
   <!-- <div class="splash" [hidden]="isCompletedToLoadData">
     <ion-text class="splash-center">Connecting to blockchain network...
     </ion-text>
@@ -30,6 +30,12 @@
           <ion-note color="light">
             {{account.amount}} mAlgos 
           </ion-note>
+        </ion-label>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col>
+        <ion-label>
           <p>
             <ion-chip color="light">
               <ion-label class="ion-text-wrap">
@@ -39,7 +45,6 @@
           </p>
         </ion-label>
       </ion-col>
- 
     </ion-row>
 
     <ion-row class="ion-margin-horizontal ion-margin-top" >
@@ -117,7 +122,7 @@
           <ion-card-header>
             <div align="center">
               <ion-thumbnail>
-                <img src="{{item.imageUrl}}"/>
+                <img src="{{item.imageUrl}}" (click)="openPreview(item.imageUrl)"/>
               </ion-thumbnail>
             </div>
           </ion-card-header>

@@ -6,6 +6,7 @@ import { StorageService } from '../../services/storage.service';
 import { ClipboardService } from '../../services/clipboard.service';
 import { AccountStored } from '../../models/account-stored';
 import { ToastController } from '@ionic/angular';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-export-security',
@@ -30,7 +31,8 @@ export class ExportSecurityPage implements OnInit {
     private storageService: StorageService,
     private clipboard:ClipboardService,
     public toastController: ToastController,
-    private header:HeaderService,) { }
+    private header:HeaderService,
+    private navigation:NavigationService,) { }
 
   ngOnInit() {
     const routerState = this.router.getCurrentNavigation().extras.state;

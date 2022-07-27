@@ -49,10 +49,13 @@ export class Blockchain2Service {
   getNetwork(){
     return new Promise(resolve=>{
         this.storageService.get("network").then(async response=>{
-          var responseJson = JSON.parse(response);
-          if(Object.keys(responseJson).length > 0){
-            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-            return resolve(network);
+          var responseToAny:any = response;
+          if(responseToAny!=null){
+            var responseJson = JSON.parse(response);
+            if(Object.keys(responseJson).length > 0){
+              var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+              return resolve(network);
+            }
           }else{
             //만약 최초 사용자여서 network 저장 기록이 없다면
             //default로 생성해서 저장 후 다시 불러온다.
@@ -66,7 +69,14 @@ export class Blockchain2Service {
             console.log("getNetwork",network);
             return resolve(network);
           });
-          };
+          }
+          // var responseJson = JSON.parse(response);
+          // if(Object.keys(responseJson).length > 0){
+          //   var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+          //   return resolve(network);
+          // }else{
+            
+          // };
         });
     });
   }  

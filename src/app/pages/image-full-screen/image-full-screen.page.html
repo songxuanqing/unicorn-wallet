@@ -1,0 +1,14 @@
+<ion-content [fullscreen]="true" color="dark">
+  <ion-item class="close-fake" lines="none" text-center>
+    <ion-button (click)="close()" fill="clear" color="light">
+      <ion-icon name="close" slot="start"></ion-icon>
+    </ion-button>
+  </ion-item>
+
+  <ion-slides [options]="sliderOpts">
+    <ion-slide>
+      <img src="{{img}}">
+    </ion-slide>
+  </ion-slides>
+
+</ion-content>

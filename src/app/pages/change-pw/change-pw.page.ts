@@ -4,6 +4,7 @@ import { StorageService } from '../../services/storage.service';
 import { AccountStored } from '../../models/account-stored';
 import { ModalController } from '@ionic/angular';
 import { ChangePWModal } from './change-pw-modal';
+import { HeaderService } from '../../services/header.service';
 
 @Component({
   selector: 'app-change-pw',
@@ -18,7 +19,8 @@ export class ChangePWPage {
   constructor( private router:Router,
     private route:ActivatedRoute,
     private storageService: StorageService,
-    private modalCtrl: ModalController) { }
+    private modalCtrl: ModalController,
+    private header:HeaderService,) { }
 
   
   //현재 비밀번호 Next눌러 입력 후 아래 함수 호출

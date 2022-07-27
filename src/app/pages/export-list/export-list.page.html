@@ -1,20 +1,35 @@
-<ion-content fullscreen>
+<ion-content [fullscreen]="true" color="dark">
   <div class="main-header">
     <ion-avatar slot="start" (click)="header.openMenu()">
       <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
     </ion-avatar>
  <ion-grid>
   <ion-row class="ion-margin-top">
+    <ion-col>
+      <div class="back">
+        <ion-button color="primary" fill="clear" class="back" (click)="navigation.goBack()">Back</ion-button>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <ion-note>
+        Select an account to export
+      </ion-note>
+    </ion-col>
+  </ion-row>
+  <ion-row>
   <ion-col>
     <ion-list>
-      <!-- <ion-button color="primary" fill="clear">Back</ion-button> -->
         <ion-item lines="none" *ngFor="let item of accountListWithAmount" (click)="goToExportSecurity(item)">
           <ion-icon slot="start" color="primary" name="save"></ion-icon>
-          <ion-label size="large" class="ion-text-wrap">
-            <p>{{item.account.name}}</p>
-            <p class="wrap-text">{{item.account.addr}}</p>
-          </ion-label>
-          <ion-text slot="end" [color]="dark">{{item.amount}}</ion-text>
+          <div class="ion-margin-botton div-display-inline">
+            <ion-label size="large" class="wrap-text">
+              <p>{{item.account.name}}</p>
+              <p >{{item.account.addr}}</p>
+            </ion-label>
+            <ion-text slot="end" [color]="dark">{{item.amount}} mAlgos</ion-text>
+          </div>
         </ion-item>
     </ion-list>
   </ion-col>

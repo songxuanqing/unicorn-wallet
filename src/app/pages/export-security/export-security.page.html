@@ -1,4 +1,4 @@
-<ion-content fullscreen>
+<ion-content [fullscreen]="true" color="dark">
   <div class="main-header">
     <ion-avatar slot="start" (click)="header.openMenu()">
       <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
@@ -6,6 +6,10 @@
  <ion-grid >
     <ion-row class="ion-margin-top">
       <ion-col>
+        <ion-item>
+          <ion-button color="primary" class="back" fill="clear" (click)="navigation.goBack()">Back</ion-button>
+        </ion-item>
+        
           <ion-item lines="none">
             <ion-text class="highlight ion-margin-top ion-margin-bottom">
               {{title}}

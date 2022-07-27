@@ -6,6 +6,7 @@ import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
 import { StorageService } from '../../services/storage.service';
 import { AccountStored } from '../../models/account-stored';
 import { AccountWithAmount } from '../../models/account-with-amount';
+import { NavigationService } from '../../services/navigation.service';
 
 @Component({
   selector: 'app-export-list',
@@ -22,13 +23,14 @@ export class ExportListPage implements OnInit {
     private blockchainSDKService: Blockchain3Service,
     private storageService: StorageService,
     private header:HeaderService,
+    private navigation:NavigationService,
     ) { }
 
   ngOnInit() {
+    this.getAccountList();
   }
   ionViewWillEnter(){
-    this.getAccountList();
-    //this.getDevAccount();
+
   }
   getAccountList(){
     this.storageService.getDecryption("accounts",null).then(async(response)=>{

@@ -67,6 +67,10 @@ const routes: Routes = [
     path: 'change-pw',
     loadChildren: () => import('./pages/change-pw/change-pw.module').then( m => m.ChangePWPageModule)
   },
+  {
+    path: 'image-full-screen',
+    loadChildren: () => import('./pages/image-full-screen/image-full-screen.module').then( m => m.ImageFullScreenPageModule)
+  },
 ];
 
 @NgModule({
