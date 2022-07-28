@@ -110,9 +110,9 @@ export class WalletPage implements OnInit {
 
 
   async getAccountInfo(account_address) {
-    //rest api 서비스의 변수들 먼저 생성.
-    await this.apiService.setNetworkVariables();
-    await this.blockchainSDKService.setNetworkVariables();
+    // //rest api 서비스의 변수들 먼저 생성.
+    // await this.apiService.setNetworkVariables();
+    // await this.blockchainSDKService.setNetworkVariables();
     this.apiService.getAccountInfo(account_address).then(async (response) => {
       var accountData:any = response;
       accountData = accountData.account;

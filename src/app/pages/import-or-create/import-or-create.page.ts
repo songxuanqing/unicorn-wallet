@@ -114,13 +114,13 @@ export class ImportOrCreatePage implements OnInit {
         newAccount.mnemonic = ev.detail.data[1];
         this.accountList.push(newAccount);
         await this.storeAccount();
-        newAccount.mnemonic = "";
+        // newAccount.mnemonic = "";
         this.account = newAccount;
         
         //싱글톤 account list 생성
-        var tempList:Array<AccountStored> = [];
-        tempList.push(newAccount);
-        this.getAccount.setAccountList(tempList);
+        // var tempList:Array<AccountStored> = [];
+        // tempList.push(newAccount);
+        this.getAccount.setAccountList(this.accountList);
 
         return resolve(true);
         }else{
@@ -145,13 +145,13 @@ export class ImportOrCreatePage implements OnInit {
         newAccount.mnemonic = responseArr[1];
         this.accountList.push(newAccount);
         await this.storeAccount();
-        newAccount.mnemonic = "";
+        // newAccount.mnemonic = "";
         this.account = newAccount;
 
         //싱글톤 account list 생성
-        var tempList:Array<AccountStored> = [];
-        tempList.push(newAccount);
-        this.getAccount.setAccountList(tempList);
+        // var tempList:Array<AccountStored> = [];
+        // tempList.push(newAccount);
+        this.getAccount.setAccountList(this.accountList);
 
         return resolve(true);
       });

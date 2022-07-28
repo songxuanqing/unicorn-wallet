@@ -112,7 +112,12 @@ export class ConfirmPage implements OnInit {
       this.router.navigateByUrl('/wallet',navigationExtras);
     }
     });
-   
+  }
+
+  goToWalletPage(){
+    const navigationExtra: NavigationExtras = {
+    };
+    this.router.navigateByUrl('/wallet',navigationExtra);
   }
 
   //db에 최근 보낸 주소를 가져온 다음, 현재 항목을 추가해서 다시 저장.
@@ -214,6 +219,7 @@ export class ConfirmPage implements OnInit {
     return new Promise (resolve=>{
       this.storageService.getDecryption("accounts",null).then(async(response)=>{
         var accounts:any = response;  
+        console.log("confirm",accounts);
         var mnemonic = "";
         accounts.forEach(item=>{
           if(sender == item.addr){

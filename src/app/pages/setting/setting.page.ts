@@ -5,6 +5,8 @@ import getSymbolFromCurrency from 'currency-symbol-map';
 import { Currency } from '../../const/currency';
 import { Network } from '../../const/network';
 import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
+import { Blockchain2Service } from '../../services/blockchain2.service';
+import { Blockchain3Service } from '../../services/blockchain3.service';
 
 @Component({
   selector: 'app-setting',
@@ -23,6 +25,8 @@ export class SettingPage implements OnInit {
     private router:Router,
     private route:ActivatedRoute,
     private header:HeaderService,
+    private apiService: Blockchain2Service,
+    private blockchainSDKService: Blockchain3Service,
     ) { }
 
   ngOnInit() {
@@ -93,7 +97,7 @@ export class SettingPage implements OnInit {
   }
 
   //선택한 Network명으로 ip주를 mapping하여서 가져온다.
-  selectNetwork(networkName){
+  async selectNetwork(networkName){
     var networkObj;
     if(networkName == 'MainNet'){
       networkObj = Network.NETWORK_TYPE_TO_IP_MAP.MainNet;
@@ -104,7 +108,9 @@ export class SettingPage implements OnInit {
     }
     var networkValue = {network:networkObj,};
     var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
-    this.storageService.set("network",networkValueToString);
+    await this.storageService.set("network",networkValueToString);
+    await this.apiService.setNetworkVariables();
+    await this.blockchainSDKService.setNetworkVariables();
   }
 
   //비밀번호 재설정 페이지 이동

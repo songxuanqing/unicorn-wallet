@@ -40,6 +40,7 @@ export class StorageService {
     }else{
       return new Promise(async(resolve)=>{
         try{
+          console.log(key,"value",value);
           chrome.storage.local.set({[key]: value}, function() {
             //key변수를 key 요소에 할당
             //value변수를 value요소에 할당
@@ -150,6 +151,7 @@ export class StorageService {
   //저장소에 key:value로 저장한다. 이때 value는 encryptionKey로 암호화해서 암호화된 값으로 저장한다.
   public setEncryption(key: string, value: any, encryptionKey:string|null){
     return new Promise (resolve=>{
+      console.log("seten",key,value);
       //암호화대상은 string 이여야 하므로 string으로 변환한다.
       var valueToString = JSON.stringify(value); 
       var k:string = "";
@@ -176,6 +178,7 @@ export class StorageService {
   //암호화된 값을 복호화해서 가져온다.
   public getDecryption = (key:string, encryptionKey:string|null) => {
     return new Promise(async(resolve,reject)=>{
+      console.log("getDes",this.hashedKey);
       try{
         var encryptedValue = await this.get(key); //암호화된 정보:hash,account
         var k:string="";

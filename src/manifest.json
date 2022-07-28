@@ -38,7 +38,7 @@
      "activeTab",
      "webNavigation",
      "scripting",
-     "chrome-extension://*",
+     "chrome-extension://*/*",
      "file://*/*", "http://*/*", "https://*/*"
     ],
     "externally_connectable": {

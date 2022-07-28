@@ -70,12 +70,12 @@ export class AccountPage implements OnInit {
       this.storeAccount();
 
       //싱글톤 getAccount서비스의 목록도 업데이트
-      var tempList = this.accountList;
-      for(var i = 0; i < tempList.length; i++){
-        var index = tempList.indexOf(tempList[i]);
-        tempList[index].mnemonic = "";
-      }
-      this.getAccountService.setAccountList(tempList);   
+      // var tempList = this.accountList;
+      // for(var i = 0; i < tempList.length; i++){
+      //   var index = tempList.indexOf(tempList[i]);
+      //   tempList[index].mnemonic = "";
+      // }
+      this.getAccountService.setAccountList(this.accountList);   
     });
   }
 
@@ -182,12 +182,12 @@ export class AccountPage implements OnInit {
       this.storeAccount();
 
       //싱글톤 getAccount서비스의 목록도 업데이트
-      var tempList = this.accountList;
-      for(var i = 0; i < tempList.length; i++){
-        var index = tempList.indexOf(tempList[i]);
-        tempList[index].mnemonic = "";
-      }
-      this.getAccountService.setAccountList(tempList);  
+      // var tempList = this.accountList;
+      // for(var i = 0; i < tempList.length; i++){
+      //   var index = tempList.indexOf(tempList[i]);
+      //   tempList[index].mnemonic = "";
+      // }
+      this.getAccountService.setAccountList( this.accountList);  
 
       }else{
 
@@ -230,12 +230,12 @@ export class AccountPage implements OnInit {
     this.handleToastController("The main account changed successfully.");
     
     //싱글톤 getAccount서비스의 목록도 업데이트
-    var tempList = this.accountList;
-    for(var i = 0; i < tempList.length; i++){
-      var index = tempList.indexOf(tempList[i]);
-      tempList[index].mnemonic = "";
-    }
-    this.getAccountService.setAccountList(tempList);   
+    // var tempList = this.accountList;
+    // for(var i = 0; i < tempList.length; i++){
+    //   var index = tempList.indexOf(tempList[i]);
+    //   tempList[index].mnemonic = "";
+    // }
+    this.getAccountService.setAccountList(this.accountList);   
   }
 
   async changeAccountName(newAccountName,accountWithAmount){
@@ -269,12 +269,12 @@ export class AccountPage implements OnInit {
     this.handleToastController("The account name changed successfully.");
     
     //싱글톤 getAccount서비스의 목록도 업데이트
-    var tempList = this.accountList;
-    for(var i = 0; i < tempList.length; i++){
-      var index = tempList.indexOf(tempList[i]);
-      tempList[index].mnemonic = "";
-    }
-    this.getAccountService.setAccountList(tempList);  
+    // var tempList = this.accountList;
+    // for(var i = 0; i < tempList.length; i++){
+    //   var index = tempList.indexOf(tempList[i]);
+    //   tempList[index].mnemonic = "";
+    // }
+    this.getAccountService.setAccountList(this.accountList);  
   }
 
   goToExportPage(){
