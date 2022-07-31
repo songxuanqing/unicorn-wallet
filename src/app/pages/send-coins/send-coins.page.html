@@ -1,0 +1,60 @@
+<ion-content [fullscreen]="true" color="dark">
+  <div class="main-header">
+    <ion-avatar slot="start" (click)="header.openMenu()">
+      <img class="ion-margin-horizontal ion-margin-top" src="../../../assets/img/unicorn.png">
+    </ion-avatar>
+ <ion-grid>
+  <ion-row class="ion-margin-top">
+  <ion-col>
+    <ion-list>
+      <ion-button color="primary" fill="clear" (click)="navigation.goBack()">Back</ion-button>
+      <ion-item-group>
+        <ion-item-divider>
+          <ion-label>From</ion-label>
+        </ion-item-divider>
+        <ion-item lines="none">
+          <ion-label class="ion-text-wrap">{{sender}}</ion-label>
+        </ion-item>
+        <ion-item-divider>
+          <ion-label>To</ion-label>
+        </ion-item-divider>
+        <ion-item lines="none">
+          <ion-input type="text" class="ion-text-wrap receiverInput" [(ngModel)]="receiver"></ion-input>
+        </ion-item>
+        <ion-item-divider>
+          <ion-label>Amount</ion-label>
+        </ion-item-divider>
+        <ion-item lines="none" >
+          <ion-row>
+            <ion-col>
+              <ion-note class="verticalBottom">Current Balance</ion-note>
+            </ion-col>
+            <ion-col>
+              <ion-note class="verticalBottom">{{currentBalance}}</ion-note>
+            </ion-col>
+          </ion-row>
+        </ion-item>
+        <ion-item>
+          <ion-label>Sent Amount</ion-label>
+          <ion-input type="text" class="ion-text-right" [(ngModel)]="sent_amount"></ion-input>
+          <ion-label class="verticalBottom">{{unit}}</ion-label>
+        </ion-item>
+      </ion-item-group>
+    </ion-list>
+  </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <section>
+        <ion-button color="primary" fill="white" shape="round" expand="block" (click)="goPortfolioPage()">CANCEL</ion-button>
+      </section>
+    </ion-col>
+    <ion-col>
+      <section>
+        <ion-button shape="round" expand="block" (click)="confirm()">CONFIRM</ion-button>
+      </section>
+    </ion-col>
+  </ion-row>
+  </ion-grid>
+</div>
+</ion-content>

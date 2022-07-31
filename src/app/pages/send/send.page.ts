@@ -77,7 +77,8 @@ export class SendPage implements OnInit {
   //최근 보낸 주소 가져오기
   getRecentlySentAddresses(){
     this.storageService.get("recentlySent").then(response=>{
-      if(response!=null){
+      var responseToAny:any = response;
+      if(responseToAny!=null){
         var responseJson = JSON.parse(response);
         var array = responseJson.addressList; //{addressList:[A,B,C]}
         array.forEach(item=>{

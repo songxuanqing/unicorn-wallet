@@ -18,6 +18,11 @@ export class AppComponent {
       icon: 'person-circle' 
     },
     { 
+      title: 'Portfolio', 
+      url: '/portfolio', 
+      icon: 'albums' 
+    }, 
+    { 
       title: 'Setting', 
       url: '/setting', 
       icon: 'settings' 

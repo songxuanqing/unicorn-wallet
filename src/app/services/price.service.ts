@@ -9,16 +9,16 @@ import { Http } from '@capacitor-community/http';
   providedIn: 'root'
 })
 export class PriceService {
-  base_path = "https://api.coinstats.app/public/v1/coins/algorand?";
+  base_path = "https://api.coinstats.app/public/v1/coins/";
   constructor(private http: HttpClient,
     public platform: Platform) { }
 
   //요청하는 환율 기준 단가 가져와서 반환하기.
-  async getUnitPriceWithCurrency(currency:string){
+  async getUnitPriceWithCurrency(coin,currency:string){
       var queryParams = new URLSearchParams({
         currency:currency,
       });
-      var url = this.base_path+`${queryParams}`;
+      var url = this.base_path+coin+'?'+`${queryParams}`;
     if(this.platform.is('capacitor')){
       var options = {
         url: url,

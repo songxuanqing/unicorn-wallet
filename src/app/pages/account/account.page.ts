@@ -117,10 +117,8 @@ export class AccountPage implements OnInit {
 
   async getAmountByAccount(){
     for (var item of this.accountListWithAmount){
-      var response = await this.apiService.getAccountInfo(item.account.addr)
-      var accountData:any = response;
-      accountData = accountData.account;
-      var accountAmount:number = accountData.amount;
+      var accountData:any = await this.apiService.getAccountInfo(item.account.addr)
+      var accountAmount:number = accountData.account.amount;
       item.amount = accountAmount;
     }
   }

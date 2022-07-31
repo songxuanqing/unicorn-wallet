@@ -71,6 +71,14 @@ const routes: Routes = [
     path: 'image-full-screen',
     loadChildren: () => import('./pages/image-full-screen/image-full-screen.module').then( m => m.ImageFullScreenPageModule)
   },
+  {
+    path: 'portfolio',
+    loadChildren: () => import('./pages/portfolio/portfolio.module').then( m => m.PortfolioPageModule)
+  },
+  {
+    path: 'send-coins',
+    loadChildren: () => import('./pages/send-coins/send-coins.module').then( m => m.SendCoinsPageModule)
+  },
 ];
 
 @NgModule({

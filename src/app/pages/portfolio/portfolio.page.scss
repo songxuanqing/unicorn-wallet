@@ -1,0 +1,23 @@
+ion-text {
+    text-align: left;
+    font-size: 10px;
+}
+ion-button{
+    font-weight: bold;
+}
+.verticalBottom{
+    align-self: flex-end;
+    text-align: right !important;
+}
+  
+.wrap-text {
+    margin: 0;
+    display: block;
+    overflow: hidden;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.item-display{
+    display: block;
+}

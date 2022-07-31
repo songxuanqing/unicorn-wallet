@@ -64,41 +64,55 @@ export class StorageService {
       })
     }else{
       let callbackPromise = new Promise((resolve, reject) => {
-        if(key=="accounts"){
+        try{
           chrome.storage.local.get([key], function(result) {
-            //key요소 종 요소 값이 key변수값인것 가져오기
-            //결과값이 object로 반환되는데, 이때 요소 값은 각각 key명으로 할당되어 있다.
-            //따라서 result.key변수명String같이 사용한다.
-            return resolve(result.accounts);
-        });  
-        }
-        else if(key=="keyForUser"){
-          chrome.storage.local.get([key], function(result) {
-            return resolve(result.keyForUser);
-        });  
-        }
-        else if(key=="sendTxn"){
-          chrome.storage.local.get([key], function(result) {
-            return resolve(result.sendTxn);
+            return resolve(result[key]);
         });
-        }
-        else if(key=="recentlySent"){
-          chrome.storage.local.get([key], function(result) {
-            return resolve(result.recentlySent);
-        });
-        }
-        else if(key=="currency"){
-          chrome.storage.local.get([key], function(result) {
-            return resolve(result.currency);
-        });
-        }
-        else if(key=="network"){
-          chrome.storage.local.get([key], function(result) {
-            return resolve(result.network);
-        });
-        }else{
+        }catch{
           return reject(new Error("Error!"));
         }
+
+        // if(key=="accounts"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result.accounts);
+        // });  
+        // }
+        // else if(key=="keyForUser"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result.keyForUser);
+        // });  
+        // }
+        // else if(key=="sendTxn"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result.sendTxn);
+        // });
+        // }
+        // else if(key=="recentlySent"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result.recentlySent);
+        // });
+        // }
+        // else if(key=="currency"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result.currency);
+        // });
+        // }
+        // else if(key=="network"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result.network);
+        // });
+        // }
+        // else if(key=="portfolioNetwork"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result[key]);
+        // });
+        // }
+        // else if(key=="portfolioAccounts"){
+        //   chrome.storage.local.get([key], function(result) {
+        //     return resolve(result[key]);
+        // });
+        // }
+
     })
     return callbackPromise;
     }

@@ -123,7 +123,7 @@ export class WalletPage implements OnInit {
       await this.getSelectedCurrency();
       //주어진 통화기준 알고랜드 단가 가져와서 현재 가지고 있는 알고량에 곱하기
       //전체 알고를 주어진 통화로 치환.
-      var unitPrice = await this.getUnitPriceWithCurrency(this.currency);
+      var unitPrice = await this.getUnitPriceWithCurrency("algorand",this.currency);
       this.balanceToCurrency = this.account.amount * +unitPrice;
       this.balanceToCurrency = Math.round(this.balanceToCurrency);
       this.balanceToCurrencyToString = this.balanceToCurrency.toString()
@@ -244,9 +244,9 @@ export class WalletPage implements OnInit {
   }
 
   //주어진 통화기준 알고랜드 단가 가져오기
-  getUnitPriceWithCurrency(currency){
+  getUnitPriceWithCurrency(coin,currency){
     return new Promise(resolve=>{
-      this.priceService.getUnitPriceWithCurrency(currency).then(response=>{
+      this.priceService.getUnitPriceWithCurrency(coin,currency).then(response=>{
         var responseToAny:any = response;
         var unitPrice = +responseToAny.coin.price;
         return resolve(unitPrice);
@@ -257,17 +257,15 @@ export class WalletPage implements OnInit {
    //db에서 과거에 선택했던 통화 가져오기
    getSelectedCurrency(){
     return new Promise(resolve=>{
-        this.storageService.get("currency").then(response=>{
+        this.storageService.get("currency").then(async response=>{
           var responseToAny:any = response;
           if(responseToAny!=null){
             var responseJson = JSON.parse(response);
-            if(Object.keys(responseJson).length > 0){
-              this.currency = responseJson.currency;
-              this.symbol = responseJson.symbol;
-              return resolve(true);
-            }
+            this.currency = responseJson.currency;
+            this.symbol = responseJson.symbol;
+            return resolve(false);
           }else{
-            //만약 최초 사용자여서 currency 저장 기록이 없다면
+              //만약 최초 사용자여서 currency 저장 기록이 없다면
             //USD를 default로 생성해서 저장 후 다시 불러온다.
             var currencyClass = new Currency();
             var currencySelected = currencyClass.USD;
@@ -275,7 +273,7 @@ export class WalletPage implements OnInit {
             var symbol = getSymbolFromCurrency(currency);
             var currencyValue = {currencyWithDescription:currencySelected, currency:currency, symbol:symbol};
             var currencyValueToString = JSON.stringify(currencyValue); //스트링변환해서 저장
-            this.storageService.set("currency",currencyValueToString);
+            await this.storageService.set("currency",currencyValueToString);
             this.storageService.get("currency").then(response=>{
               var responseJson = JSON.parse(response);
               this.currency = responseJson.currency;

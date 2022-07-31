@@ -56,9 +56,11 @@ export class Blockchain3Service {
     getNetwork(){
       return new Promise(resolve=>{
           this.storageService.get("network").then(async response=>{
-            var responseJson = JSON.parse(response);
-            if(Object.keys(responseJson).length > 0){
+            var responseToAny:any = response;
+            if(responseToAny!=null){
+              var responseJson = JSON.parse(response);
               var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+              console.log("getNetwork",network);
               return resolve(network);
             }else{
               //만약 최초 사용자여서 network 저장 기록이 없다면
@@ -67,16 +69,16 @@ export class Blockchain3Service {
               var networkValue = {network:networkObj,};
               var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
               await this.storageService.set("network",networkValueToString);
-              this.storageService.get("network").then(response=>{
-              var responseJson = JSON.parse(response);
-              var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-              console.log("getNetwork",network);
-              return resolve(network);
-            });
+              this.storageService.get("network").then(async response=>{
+                var responseJson = JSON.parse(response);
+                var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+                console.log("getNetwork",network);
+                return resolve(network);
+              });
             };
           });
       });
-    } 
+    }  
 
 //chrome extension 개발용, angular http요청  Handle API errors
 handleError(error: HttpErrorResponse) {

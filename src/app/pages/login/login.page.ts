@@ -7,6 +7,7 @@ import { GetAccountService } from '../../services/get-account.service';
 import { ModalController } from '@ionic/angular';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
+import { BlockchainApisService } from '../../services/blockchain-apis.service';
 
 @Component({
   selector: 'app-login',
@@ -28,10 +29,16 @@ export class LoginPage implements OnInit {
     private modalCtrl: ModalController,
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service,
+    private blockchainApisService: BlockchainApisService,
     ) { }
 
   ngOnInit() {
     this.initServices();
+    var isExistPW = this.redirection();
+    if(!isExistPW){
+      var navigationExtra: NavigationExtras = {};
+      this.router.navigateByUrl('/signup',navigationExtra);
+    }
   }
 
   async initServices(){
@@ -40,10 +47,16 @@ export class LoginPage implements OnInit {
     //외부 요청으로 txn 수행시 지갑 페이지를 거치지 않고 바로 confirm page로 넘어가기 때문.
     await this.apiService.setNetworkVariables();
     await this.blockchainSDKService.setNetworkVariables();
+    await this.blockchainApisService.setNetworkVariables();
   }
 
   async redirection(){
-    
+    var keyForUserStoredValue = await this.storageService.get("keyForUser");
+    if(keyForUserStoredValue!=null){
+      return true;
+    }else{
+      return false;
+    }
   }
 
   async confirm(pw) {

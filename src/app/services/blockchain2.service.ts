@@ -52,34 +52,26 @@ export class Blockchain2Service {
           var responseToAny:any = response;
           if(responseToAny!=null){
             var responseJson = JSON.parse(response);
-            if(Object.keys(responseJson).length > 0){
-              var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-              return resolve(network);
-            }
+            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+            console.log("getNetwork",network);
+            return resolve(network);
           }else{
-            //만약 최초 사용자여서 network 저장 기록이 없다면
+               //만약 최초 사용자여서 network 저장 기록이 없다면
             //default로 생성해서 저장 후 다시 불러온다.
             var networkObj = Network.NETWORK_TYPE_TO_IP_MAP.TestNet;
             var networkValue = {network:networkObj,};
             var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
             await this.storageService.set("network",networkValueToString);
-            this.storageService.get("network").then(response=>{
-            var responseJson = JSON.parse(response);
-            var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-            console.log("getNetwork",network);
-            return resolve(network);
-          });
-          }
-          // var responseJson = JSON.parse(response);
-          // if(Object.keys(responseJson).length > 0){
-          //   var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
-          //   return resolve(network);
-          // }else{
-            
-          // };
+            this.storageService.get("network").then(async response=>{
+              var responseJson = JSON.parse(response);
+              var network = responseJson.network; //{network : {algodIp:XXX,algodToken:xxx,indexerIp:xxx,indexerToken}}
+              console.log("getNetwork",network);
+              return resolve(network);
+            });
+          };
         });
     });
-  }  
+  }
 
 
   //chrome extension 개발용 angular Http요청 위한 api error 핸들링
