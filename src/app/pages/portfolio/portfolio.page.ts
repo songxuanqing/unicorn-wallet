@@ -8,6 +8,7 @@ import { ToastController } from '@ionic/angular';
 import { Chart, DoughnutController,ArcElement, PointElement, Legend,Title,Tooltip } from 'chart.js';
 import { PriceService } from '../../services/price.service';
 import { Blockchain2Service } from '../../services/blockchain2.service';
+import { PortfolioNetwork } from '../../const/portfolio-network';
 
 @Component({
   selector: 'app-portfolio',
@@ -17,6 +18,8 @@ import { Blockchain2Service } from '../../services/blockchain2.service';
 export class PortfolioPage implements OnInit {
   @ViewChild('chart', {static: true}) chart;
   
+  networkSelected:string;
+  isNetworkTestNet:boolean=true;
   doughnut: any;
   isBackFromTxn:boolean = false;
   portfolioAccounts:Array<any> = [];
@@ -38,6 +41,7 @@ export class PortfolioPage implements OnInit {
     ) { }
 
   ngOnInit() {
+    this.getSelectedNetwork();
     this.getAccountList().then(response=>{
       this.createChart();
     });
@@ -66,15 +70,15 @@ export class PortfolioPage implements OnInit {
           data: [],
           backgroundColor: [
             'rgba(251,78,132,255)',
-            'rgba(253,120,79,255)',
+            // 'rgba(253,120,79,255)',
             'rgba(224,182,62,255)',
-            'rgba(177,237,101,255)',
+            // 'rgba(177,237,101,255)',
             'rgba(90,244,110,255)',
-            'rgba(48,222,163,255)',
+            // 'rgba(48,222,163,255)',
             'rgba(46,172,213,255)',
-            'rgba(78,113,215,255)',
+            // 'rgba(78,113,215,255)',
             'rgba(109,69,168,255)',
-            'rgba(189,66,173,255)',
+            // 'rgba(189,66,173,255)',
           ],
           hoverOffset: 4
         }]
@@ -90,11 +94,48 @@ export class PortfolioPage implements OnInit {
         console.log(dataset.data,"dataset.data");
     });
     chart.update();
-}
+  }
 
+  replaceChartData(chart, label, data) {
+    var index = chart.data.labels.indexOf(label);
+    // console.log(chart.data.labels,"chart.data.labels");
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data[index] = data;
+        console.log(dataset.data,"dataset.data");
+    });
+    chart.update();
+  }
 
-  changeNetwork(){
-    //setPortfolioNetwork
+  getSelectedNetwork(){
+    this.storageService.get("portfolioNetwork").then(response=>{
+      console.log(response);
+      var responseJson = JSON.parse(response);
+      this.networkSelected = responseJson.network.networkName;
+      if(this.networkSelected=="TestNet"){
+        this.isNetworkTestNet=true;
+      }else{
+        this.isNetworkTestNet=false;
+      }
+    });
+  }
+
+  selectNetworkChange(e) {
+    this.selectNetwork(e.detail.value);
+   }
+
+   //선택한 Network명으로 ip주를 mapping하여서 가져온다.
+  async selectNetwork(networkName){
+    var networkObj;
+    if(networkName == 'MainNet'){
+      networkObj = PortfolioNetwork.NETWORK_TYPE_TO_IP_MAP.MainNet;
+    }else if(networkName == 'TestNet'){
+      networkObj = PortfolioNetwork.NETWORK_TYPE_TO_IP_MAP.TestNet;
+    }
+    var networkValue = {network:networkObj,};
+    var networkValueToString = JSON.stringify(networkValue); //스트링변환해서 저장
+    await this.storageService.set("portfolioNetwork",networkValueToString);
+    await this.blockchainApisService.setNetworkVariables();
+    // window.location.reload();
   }
 
   getAccountList(){
@@ -121,8 +162,8 @@ export class PortfolioPage implements OnInit {
             var network = item.network;
             var accounts = item.accounts;
             console.log("getAccountList()",responseToAny);
+            this.updatePortfolioAccountsWithAmount(network,accounts);
           };
-          this.updatePortfolioAccountsWithAmount(network,accounts);
         };
       }).catch(e=>{
         
@@ -169,46 +210,72 @@ export class PortfolioPage implements OnInit {
     });
   }
 
-  goToSendCoinsPage(network,address){
-    const navigationExtras: NavigationExtras = {
-      state: {
+  goToSendCoinsPage(network,address,id){
+    var state={};
+    var destination="";
+    if(network=="algorand"){
+      state={
         txnParams:{
+          sender: address,
+        },
+      };
+      destination = "/send";
+    }else{
+      state={
+        txnParams:{
+          sender_id:id,
           sender: address,
           network: network,
         },
-      },
+      };
+      destination = "/send-coins";
+    }
+    const navigationExtras: NavigationExtras = {
+     state:state,
     };
-    this.router.navigateByUrl('/send-coins',navigationExtras);
+    this.router.navigateByUrl(destination,navigationExtras);
   }
 
 
   createNewAccount(network){
     this.blockchainApisService.createAccount(network).then(response=>{
       var responseToAny:any = response;
-      var address = responseToAny.payload.address;
-      var privateKey = responseToAny.payload.privateKey;
-      var account = {address:address, privateKey:privateKey};
+      var address;
+      var privateKey;
+      var id=null;
+      if(network=="bitcoin"||network=="litecoin"){
+        address = responseToAny.payload.name;
+        id = responseToAny.payload.id;
+        privateKey = responseToAny.payload.wif;
+      }else{
+        address = responseToAny.payload.address;
+        privateKey = responseToAny.payload.privateKey;
+      }
+      var account = {address:address, privateKey:privateKey, id:id};
       //list에 push한 후 저장한다.
       if(this.portfolioAccounts.length>0){
+        var index=null;
         for(var i=0; i<this.portfolioAccounts.length; i++){
-          var item = this.portfolioAccounts[i];
-          if(item.network==network){
-            //기존 네트워크에 계정이 이미 존재할 경우
-            this.portfolioAccounts[i].accounts.push(account);
-            // var index = this.portfolioAccounts.indexOf(item);
-            // if (index !== -1) {
-            //   this.portfolioAccounts[index] = newAccount;
-            // }
+          if(this.portfolioAccounts[i].network==network){
+            index=i;
           }else{
-            var accountList = [];
-            accountList.push(account);
-            var portfolioAccount = {network:network,accounts:accountList};
-            this.portfolioAccounts.push(portfolioAccount);
-            this.setAccountInfo(this.portfolioAccounts);
-            this.updatePortfolioAccountsWithAmount(network,accountList);
           };
         };
+        if(index!=null){
+          //기존 네트워크에 계정이 이미 존재할 경우
+          this.portfolioAccounts[index].accounts.push(account);
+          this.setAccountInfo(this.portfolioAccounts);
+          this.updatePortfolioAccountsWithAmount(network,this.portfolioAccounts[index].accounts);
+        }else{
+          var accountList = [];
+          accountList.push(account);
+          var portfolioAccount = {network:network,accounts:accountList};
+          this.portfolioAccounts.push(portfolioAccount);
+          this.setAccountInfo(this.portfolioAccounts);
+          this.updatePortfolioAccountsWithAmount(network,accountList);
+        }
       }else{
+        //최초 생성의 경우
         var accountList = [];
         accountList.push(account);
         var portfolioAccount = {network:network,accounts:accountList};
@@ -220,6 +287,7 @@ export class PortfolioPage implements OnInit {
   }
 
   async updatePortfolioAccountsWithAmount(network,accountList){
+    console.log("accountList",accountList);
     var networkInfo:any = await this.blockchainApisService.getNetworkAPIInfo(network);
     var coin = networkInfo.networkDefine;
     var smallestUnit = networkInfo.smallestUnit;
@@ -229,10 +297,11 @@ export class PortfolioPage implements OnInit {
     var subSum = 0;
     for(var i=0; i<accountList.length; i++){
       var addr = accountList[i].address;
+      var id = accountList[i].id;
       console.log(i,accountList[i].address)
       var balance:any = 0;
       var balanceToString = 0;
-      var accountWithAmount = {address:addr,balance:balance,balanceToCurrency:balanceToString};
+      var accountWithAmount = {address:addr,id:id,balance:balance,balanceToCurrency:balanceToString};
       accountWithAmountList.push(accountWithAmount);
       try{
         if(network=="algorand"){
@@ -241,7 +310,12 @@ export class PortfolioPage implements OnInit {
           var marketBalance = accountAmount*marketConversion;
           accountWithAmountList[i].balance = marketBalance;
         }else{
-          var accountData:any = await this.getAccountBalance(network,addr);
+          var accountData:any;
+          if(network=="bitcoin"||network=="litecoin"){
+            accountData = await this.getAccountBalance(network,accountList[i].id);
+          }else{
+            accountData = await this.getAccountBalance(network,addr);
+          }
           var accountAmount:number = accountData;
           var marketBalance = +accountAmount*marketConversion;
           accountWithAmountList[i].balance = marketBalance;
@@ -257,11 +331,33 @@ export class PortfolioPage implements OnInit {
         continue;
       };
     };
-    var portfolioAccountWithAmount = {network:network,marketUnit:marketUnit,accounts:accountWithAmountList};
-    this.portfolioAccountsWithAmount.push(portfolioAccountWithAmount);
-    this.subSumByNetworkList.push(subSum);
-    this.nameByNetworkList.push(network);
-    this.updateChart(this.doughnut,network,subSum);
+    //만약 동일 네트워크가 목록에 있을 경우
+    console.log(this.portfolioAccountsWithAmount.length,"this.portfolioAccountsWithAmount.length");
+    if(this.portfolioAccountsWithAmount.length>0){
+      var index = null;
+      for(var i=0; i<this.portfolioAccountsWithAmount.length; i++){
+        if(this.portfolioAccountsWithAmount[i].network == network){
+          index = i;
+        }else{
+          continue;
+        };
+      };
+      if (index!=null) {
+        this.portfolioAccountsWithAmount[index].accounts = accountWithAmountList;
+        this.replaceChartData(this.doughnut,network,subSum);
+      }else{
+        var portfolioAccountWithAmount = {network:network,marketUnit:marketUnit,accounts:accountWithAmountList};
+        this.portfolioAccountsWithAmount.push(portfolioAccountWithAmount);
+        this.updateChart(this.doughnut,network,subSum);
+      }
+    }else{
+      var portfolioAccountWithAmount = {network:network,marketUnit:marketUnit,accounts:accountWithAmountList};
+      this.portfolioAccountsWithAmount.push(portfolioAccountWithAmount);
+      this.updateChart(this.doughnut,network,subSum);
+    }
+    // this.subSumByNetworkList.push(subSum);
+    // this.nameByNetworkList.push(network);
+
   }
 
   async setAccountInfo(accounts){
@@ -288,9 +384,10 @@ export class PortfolioPage implements OnInit {
       ],
       inputs: [
         {
-          label: 'Bitcoin',
+          label: 'Bitcoin[Mainnet only]',
           type: 'radio',
-          value: 'bitcoin'
+          value: 'bitcoin',
+          disabled : this.isNetworkTestNet,
         },
         {
           label: 'Ethereum',
@@ -311,11 +408,6 @@ export class PortfolioPage implements OnInit {
           label: 'Avalanche C Chain',
           type: 'radio',
           value: 'avalanche-2'
-        },
-        {
-          label: 'Litecoin',
-          type: 'radio',
-          value: 'litecoin'
         },
       ]
     });

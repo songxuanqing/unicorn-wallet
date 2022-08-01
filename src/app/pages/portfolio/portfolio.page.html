@@ -5,13 +5,17 @@
     </ion-avatar>
  <ion-grid>
   <ion-row class="ion-margin-top">
-    <ion-select interface="popover">
-      <ion-select-option value="mainNet">Mainnet</ion-select-option>
-      <ion-select-option value="testNet">Testnet</ion-select-option>
-    </ion-select>
+    <ion-col>
+      <ion-select class="networkSelect" interface="popover" [(ngModel)]="networkSelected" (ionChange)="selectNetworkChange($event)" size="full">
+        <ion-select-option value="MainNet">Mainnet</ion-select-option>
+        <ion-select-option value="TestNet">Testnet</ion-select-option>
+      </ion-select>
+    </ion-col>
   </ion-row >
   <ion-row>
-    <canvas #chart></canvas>
+    <ion-col class="ion-margin-start ion-margin-end">
+      <canvas #chart></canvas>
+    </ion-col>
   </ion-row>
   <ion-row class="ion-margin-top">
     <ion-col>
@@ -35,7 +39,7 @@
         <ion-label>Balance</ion-label>
         <ion-label>{{currency}}</ion-label> -->
       </ion-item-divider>
-      <ion-item (click)="goToSendCoinsPage(item.network,account.address)" *ngFor="let account of item.accounts">
+      <ion-item (click)="goToSendCoinsPage(item.network,account.address, account.id)" *ngFor="let account of item.accounts">
         <ion-label>{{account.address}}</ion-label>
         <ion-label>{{account.balance}}</ion-label>
         <ion-label>{{account.balanceToCurrency}}</ion-label>

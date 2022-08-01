@@ -10,6 +10,7 @@ import { BlockchainApisService } from '../../services/blockchain-apis.service';
   styleUrls: ['./send-coins.page.scss'],
 })
 export class SendCoinsPage implements OnInit {
+  sender_id=null;
   sender="";
   receiver="";
   sent_amount=0;
@@ -21,10 +22,12 @@ export class SendCoinsPage implements OnInit {
     private route:ActivatedRoute,
     private header:HeaderService,
     private blockchainApisService: BlockchainApisService,
+    private navigation:NavigationService,
     ) { }
 
   ngOnInit() {
     const routerState = this.router.getCurrentNavigation().extras.state;
+    this.sender_id = routerState.txnParams.sender_id;
     this.sender = routerState.txnParams.sender;
     this.network = routerState.txnParams.network;
     this.getCurrentBalance(this.network,this.sender);
@@ -56,7 +59,13 @@ export class SendCoinsPage implements OnInit {
 
   async confirm(){
     var privateKey = await this.blockchainApisService.getPrivateKey(this.network,this.sender);
-    this.sendTxn(this.network,this.sender,this.receiver,this.sent_amount).then(response=>{
+    var sender;
+    if(this.network=="bitcoin"||this.network=="litecoin"){
+      sender=this.sender_id;
+    }else{
+      sender=this.sender;
+    }
+    this.sendTxn(this.network,sender,this.receiver,this.sent_amount).then(response=>{
       const navigationExtras: NavigationExtras = {
         state: {
           txnParams:{
@@ -78,6 +87,12 @@ export class SendCoinsPage implements OnInit {
         return resolve(responseToAny.payload.hash);
       });
     });
+  }
+
+  goPortfolioPage(){
+    const navigationExtra: NavigationExtras = {
+    };
+    this.router.navigateByUrl('/portfolio',navigationExtra);
   }
 
 

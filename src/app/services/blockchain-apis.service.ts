@@ -89,9 +89,25 @@ export class BlockchainApisService {
     var networkInfo:any = await this.getNetworkAPIInfo(network);
     var version = networkInfo.apiVersion;
     var networkShort = networkInfo.networkShort;
+
+    var v2Ip;
+    if(version=="v2"){
+      var networkObj = PortfolioNetwork.NETWORK_TYPE_TO_IP_MAP[version];
+      v2Ip = networkObj.baseIp;
+    }
+
+    var url;
+    var base_path;
+    if(network=="bitcoin"||network=="litecoin"){
+      base_path = v2Ip;
+      url = base_path + '/'+version+'/'+networkShort+"/wallets/hd?api_token="+this.base_token;;
+    }else{
+      base_path = this.base_path;
+      url = base_path + '/'+version+'/'+networkShort+'/address?api_token='+this.base_token;
+    }
     if(this.platform.is('capacitor')){
     var options = {
-      url: this.base_path + '/'+version+'/'+networkShort+'address?api_token='+this.base_token,
+      url: url,
       headers: { 'Content-Type': 'application/json',
       'X-API-TOKEN': this.base_token },
     };
@@ -100,7 +116,7 @@ export class BlockchainApisService {
     });
   }else{
     return await this.http
-    .post(this.base_path + '/'+version+'/'+networkShort+'/address?api_token='+this.base_token, this.httpOptions)
+    .post(url, this.httpOptions)
     .pipe(
       retry(2),
       catchError(this.handleError)
@@ -113,9 +129,25 @@ export class BlockchainApisService {
     var networkInfo:any = await this.getNetworkAPIInfo(network);
     var version = networkInfo.apiVersion;
     var networkShort = networkInfo.networkShort;
+
+    var v2Ip;
+    if(version=="v2"){
+      var networkObj = PortfolioNetwork.NETWORK_TYPE_TO_IP_MAP[version];
+      v2Ip = networkObj.baseIp;
+    }
+  
+    var url;
+    var base_path;
+    if(network=="bitcoin"||network=="litecoin"){
+      base_path = v2Ip;
+      url = base_path + '/'+version+'/'+networkShort+'/wallets/' + address+'/balance?api_token='+this.base_token;
+    }else{
+      base_path = this.base_path;
+      url = base_path + '/'+version+'/'+networkShort+'/address/' + address+'/balance?api_token='+this.base_token;
+    }
     if(this.platform.is('capacitor')){
     var options = {
-      url: this.base_path + '/'+version+'/'+networkShort+'/address/' + address+'/balance?api_token='+this.base_token,
+      url: url,
       headers: { 'Content-Type': 'application/json',
       'X-API-TOKEN': this.base_token },
       params: { },
@@ -125,7 +157,7 @@ export class BlockchainApisService {
     });
   }else{
     return await this.http
-    .get(this.base_path + '/'+version+'/'+networkShort+'/address/' + address+'/balance?api_token='+this.base_token, this.httpOptions)
+    .get(url, this.httpOptions)
     .pipe(
       retry(2),
       catchError(this.handleError)
@@ -138,33 +170,58 @@ export class BlockchainApisService {
     var networkInfo:any = await this.getNetworkAPIInfo(network);
     var version = networkInfo.apiVersion;
     var networkShort = networkInfo.networkShort;
+
     var privateKey = await this.getPrivateKey(network,from);
+    //v3용 formdata
     var formData: any = new FormData();
-    formData.append("private_key", "0x528f7be51deb30eb8f3a3ddeeb24eeeb7620f8ef07aa146004a4e9dc820e88cb");
-    formData.append("to", "0x8A55A3952c14a5475ac93C017E4F0Bf1Bb89Dd7D");
-    formData.append("amount", "100000");
+    formData.append("private_key", privateKey.toString());
+    formData.append("to", to.toString());
+    formData.append("amount", amount.toString());
     console.log("form",formData.getAll("private_key"));
+    //v2용 rawdata
+    var rawData = {
+      "wif" : privateKey.toString(),
+      "address" : to.toString(),
+      "amount" : amount,
+    }
+    var bodyData;
+     
+    var v2Ip;
+    if(version=="v2"){
+      var networkObj = PortfolioNetwork.NETWORK_TYPE_TO_IP_MAP[version];
+      v2Ip = networkObj.baseIp;
+    }
+
+    var url;
+    var base_path;
+
+    if(network=="bitcoin"||network=="litecoin"){
+      bodyData = rawData;
+      base_path = v2Ip;
+      url = base_path + '/'+version+'/'+networkShort+'/wallets/' + from+'/sendtoaddress?api_token='+this.base_token;
+    }else{
+      bodyData=formData;
+      base_path = this.base_path;
+      url = base_path = + '/'+version+'/'+networkShort+'/address/' + from+'/send?api_token='+this.base_token;
+    };
     if(this.platform.is('capacitor')){
       var options = {
-        url: this.base_path + '/'+version+'/'+networkShort+'/address/' + from+'/send?api_token='+this.base_token,
+        url: url,
         headers: { 'Content-Type': 'application/json',
         'X-API-TOKEN': this.base_token },
-        data: formData,
+        data: bodyData,
       };
       return Http.request({ ...options, method: 'POST' }).then((response)=>{
         return response.data;
       });
     }else{
-      var httpOptions = {
-        headers:{'Content-Type': 'application/json','X-API-TOKEN': this.base_token},
-      };
       return await this.http
-      .post(this.base_path + '/'+version+'/'+networkShort+'/address/' + from+'/send?api_token='+this.base_token, formData)
+      .post(url, bodyData)
       .pipe(
         retry(2),
         catchError(this.handleError)
       ).toPromise();
-    }
+    };
   }
 
 
