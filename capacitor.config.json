@@ -1,6 +1,6 @@
 {
-  "appId": "com.example.myapp",
-  "appName": "My App",
+  "appId": "com.example.unicornWallet",
+  "appName": "Unicorn wallet",
   "webDir": "www",
   "npm-client": "npm",
   "bundledWebRuntime": false,

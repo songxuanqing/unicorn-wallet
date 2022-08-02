@@ -110,9 +110,6 @@ export class WalletPage implements OnInit {
 
 
   async getAccountInfo(account_address) {
-    // //rest api 서비스의 변수들 먼저 생성.
-    // await this.apiService.setNetworkVariables();
-    // await this.blockchainSDKService.setNetworkVariables();
     this.apiService.getAccountInfo(account_address).then(async (response) => {
       var accountData:any = response;
       accountData = accountData.account;
@@ -134,21 +131,22 @@ export class WalletPage implements OnInit {
         var item = accountData.assets[i];
         var token = new Token();
         token.amount = item.amount;
-        token['asset-id'] = item['asset-id'];
-        token['is-frozen'] = item['is-frozen'];
-        token = await this.getAssetInfo(token,item['asset-id']);
-        this.assetInfo.push(token);
-        if(token.amount>1){
-          this.tokenInfo.push(token);
-        }
-        else if(token.amount==1){
-          if(token.url.includes('ipfs://')){
-            token = await this.getNFTImage(token);
+        if(token.amount>0){
+          token['asset-id'] = item['asset-id'];
+          token['is-frozen'] = item['is-frozen'];
+          token = await this.getAssetInfo(token,item['asset-id']);
+          this.assetInfo.push(token);
+          if(token.amount>1){
+            this.tokenInfo.push(token);
           }
-          this.NFTInfo.push(token);
-        }
-      }
-      console.log(this.assetInfo);
+          else if(token.amount==1){
+            if(token.url.includes('ipfs://')){
+              token = await this.getNFTImage(token);
+            }
+            this.NFTInfo.push(token);
+          };
+        };
+      };
       this.account.assets = this.assetInfo;
       console.log(this.account);
       //만약 tokenInfo 또는 NFTInfo배열이 길이가 0이면, 보유한 토큰/NFT가 없습니다 메세지 표시용

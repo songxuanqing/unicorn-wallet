@@ -1,4 +1,4 @@
-package com.example.myapp;
+package com.example.unicornWallet;
 
 import com.getcapacitor.BridgeActivity;
 

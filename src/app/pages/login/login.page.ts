@@ -8,6 +8,7 @@ import { ModalController } from '@ionic/angular';
 import { Blockchain2Service } from '../../services/blockchain2.service';
 import { Blockchain3Service } from '../../services/blockchain3.service';
 import { BlockchainApisService } from '../../services/blockchain-apis.service';
+import { WebIntent } from '@awesome-cordova-plugins/web-intent/ngx';
 
 @Component({
   selector: 'app-login',
@@ -30,7 +31,15 @@ export class LoginPage implements OnInit {
     private apiService: Blockchain2Service,
     private blockchainSDKService: Blockchain3Service,
     private blockchainApisService: BlockchainApisService,
-    ) { }
+    private webIntent: WebIntent,
+    ) { 
+
+      this.webIntent.onIntent().subscribe((intent: { extras: any; }) => {
+        console.log('Received Intent: ' + JSON.stringify(intent.extras));
+        // alert('Received Intent: ' + JSON.stringify(intent.extras));
+    });
+
+    }
 
   ngOnInit() {
     this.initServices();
@@ -39,6 +48,7 @@ export class LoginPage implements OnInit {
       var navigationExtra: NavigationExtras = {};
       this.router.navigateByUrl('/signup',navigationExtra);
     }
+    
   }
 
   async initServices(){
