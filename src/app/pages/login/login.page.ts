@@ -16,6 +16,7 @@ import { WebIntent } from '@awesome-cordova-plugins/web-intent/ngx';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
+  intent=null;
   pw = "";
   isCorrectPw = null;
   account:AccountStored;
@@ -36,7 +37,9 @@ export class LoginPage implements OnInit {
 
       this.webIntent.onIntent().subscribe((intent: { extras: any; }) => {
         console.log('Received Intent: ' + JSON.stringify(intent.extras));
-        // alert('Received Intent: ' + JSON.stringify(intent.extras));
+        if(intent.extras!=null){
+          this.intent = intent.extras;
+        }
     });
 
     }
@@ -45,7 +48,11 @@ export class LoginPage implements OnInit {
     this.initServices();
     var isExistPW = this.redirection();
     if(!isExistPW){
-      var navigationExtra: NavigationExtras = {};
+      var navigationExtra: NavigationExtras = {
+        state: {
+          intent:this.intent,
+        },
+      };
       this.router.navigateByUrl('/signup',navigationExtra);
     }
     
@@ -74,6 +81,9 @@ export class LoginPage implements OnInit {
       try{
         this.isCorrectPw = await this.storageService.getHashedDecryption("keyForUser",pw);
         if(this.isCorrectPw){
+          if(this.intent!=null){
+            this.setIntentAccount();
+          };
           this.storageService.getDecryption("accounts",null).then(async(response)=>{
             var responseToAny:any = response;  
             console.log("login",responseToAny);
@@ -110,7 +120,12 @@ export class LoginPage implements OnInit {
       if(sendTxnStoredValue!=null){
         this.router.navigateByUrl('/confirm',navigationExtras);
       }else{
-        this.router.navigateByUrl('/wallet',navigationExtras);
+        if(this.intent!=null){
+          this.router.navigateByUrl('/account',navigationExtras);
+        }else{
+          this.router.navigateByUrl('/wallet',navigationExtras);
+        }
+        
       }
     }
   }
@@ -126,14 +141,35 @@ export class LoginPage implements OnInit {
         account.mnemonic = item.mnemonic;
         this.accountList.push(account); //싱글톤 getaccountservice에 저장
       });
+
       this.getAccount.setAccountList(this.accountList);
       var account = this.getAccount.getAccount();
       return resolve(account);
     });
   }
 
+  setIntentAccount(){
+    return new Promise(resolve=>{
+      this.storageService.getDecryption("accounts",null).then(async(response)=>{
+        var responseToAny:any = response;  
+        var account = new AccountStored();
+        account.isMain = false;
+        account.addr = this.intent.address;
+        account.name = "Account_intent";
+        account.mnemonic = this.intent.mnemonic;
+        responseToAny.push(account);
+        await this.storageService.setEncryption("accounts",responseToAny,null);
+        return resolve(true);
+      });
+    });
+  }
+
   goToSignup(){
-    let navigationExtra: NavigationExtras = {};
+    let navigationExtra: NavigationExtras = {
+      state: {
+        intent:this.intent,
+      },
+    };
     this.router.navigateByUrl('/signup',navigationExtra);
     this.cancel();
   }

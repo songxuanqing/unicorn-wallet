@@ -11,6 +11,7 @@ import { NavigationExtras, Router, ActivatedRoute } from '@angular/router';
   styleUrls: ['./signup.page.scss'],
 })
 export class SignupPage implements OnInit {
+  intent=null;
   public accountList:Array<AccountStored> = [];
   private pw = ""; 
   private confirmedPw = "";
@@ -23,14 +24,29 @@ export class SignupPage implements OnInit {
     ) { }
 
   ngOnInit() {
+    const routerState = this.router.getCurrentNavigation().extras.state;
+    if(routerState!=null||routerState!={}){
+      this.intent = routerState.intent;
+    }
   }
 
   signup(){
-    this.hashAndStorePw(this.confirmedPw).then(response=>{
+    this.hashAndStorePw(this.confirmedPw).then(async response=>{
       console.log("done up to move");
-      const navigationExtras: NavigationExtras = {
-      };
-      this.router.navigateByUrl('/import-or-create',navigationExtras);
+      const navigationExtras: NavigationExtras = {};
+      if(this.intent!=null){
+        var accountList = [];
+        var account:AccountStored = new AccountStored();
+        account.isMain = true;
+        account.addr = this.intent.address;
+        account.name = "Account_intent";
+        account.mnemonic = this.intent.mnemonic;
+        accountList.push(account);
+        await this.storageService.setEncryption("accounts",accountList,null);
+        this.router.navigateByUrl('/account',navigationExtras);
+      }else{
+        this.router.navigateByUrl('/import-or-create',navigationExtras);
+      }
     });
   }
 

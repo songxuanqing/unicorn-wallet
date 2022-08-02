@@ -239,6 +239,7 @@ export class PortfolioPage implements OnInit {
 
   createNewAccount(network){
     this.blockchainApisService.createAccount(network).then(response=>{
+      console.log("res",responseToAny);
       var responseToAny:any = response;
       var address;
       var privateKey;

@@ -100,7 +100,7 @@ export class BlockchainApisService {
     var base_path;
     if(network=="bitcoin"||network=="litecoin"){
       base_path = v2Ip;
-      url = base_path + '/'+version+'/'+networkShort+"/wallets/hd?api_token="+this.base_token;;
+      url = base_path + '/'+version+'/'+networkShort+"/wallets/hd?api_token="+this.base_token;
     }else{
       base_path = this.base_path;
       url = base_path + '/'+version+'/'+networkShort+'/address?api_token='+this.base_token;
